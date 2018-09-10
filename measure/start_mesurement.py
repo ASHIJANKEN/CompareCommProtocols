@@ -12,6 +12,12 @@ import signal
 # settings
 #####################################################
 
+base_dir_path = ''
+file_name = ''
+speed_hz = []
+file_name = ''
+
+
 one_byte_continuous = {
   'base_dir_FET':'/home/pi/workspace/I2C_1byte_continuous(FET)/',
   'base_dir_MM':'/home/pi/workspace/I2C_1byte_continuous(MM)/',
