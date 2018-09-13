@@ -1,1 +1,0 @@
-./measured_data/Arduino_UNO/SPI/throughput(FET)/
