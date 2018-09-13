@@ -31,11 +31,8 @@ const int8_t rcv_vals[128] =
   177, 95, 164, 175, 44, 107, 193, 208};
 
 void setup (void) {
-  // 送信ポートを出力にする
-  pinMode(MISO, OUTPUT);
-  SPI.setBitOrder(MSBFIRST);
-  // 立ち上がりでデータ読み取り
-  SPI.setDataMode(SPI_MODE1);
+  // Initialize SPI
+  SPISettings settings(, MSBFIRST, SPI_MODE1);
   // SPI通信を有効化
   SPCR |= _BV(SPE);
   // SSを入力にしておく

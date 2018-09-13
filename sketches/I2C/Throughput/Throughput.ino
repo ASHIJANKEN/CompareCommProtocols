@@ -26,7 +26,7 @@ const int8_t rcv_vals[128] =
 
 void setup (void) {
   // I2Cの速度を設定
-  Wire.setClock(14400L);
+  Wire.setClock(L);
   // I2Cパスにスレーブとして接続
   Wire.begin(SLAVE_ADDRESS);
   // マスタからデータが送られてきたときのハンドラを設定

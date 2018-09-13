@@ -1,121 +1,187 @@
 # -*- coding: utf-8 -*-
+
 #####################################################
-# python2.x系で走らせる事！
+# python2.x系、3.x系の両方が実行できる環境を用意し、
+# python2.x系で実行してください。
 #####################################################
 
 import sys
+import os
 import subprocess
 import time
 import signal
-
-#####################################################
-# settings
-#####################################################
-
-base_dir_path = ''
-file_name = ''
-speed_hz = []
-file_name = ''
-
-
-one_byte_continuous = {
-  'base_dir_FET':'/home/pi/workspace/I2C_1byte_continuous(FET)/',
-  'base_dir_MM':'/home/pi/workspace/I2C_1byte_continuous(MM)/',
-  'base_dir_reg_div':'/home/pi/workspace/I2C_1byte_continuous(reg_div)/',
-#   'speed_hz': range(10000, 78001, 1000),
-  'speed_hz': range(10000, 300001, 1000),
-  'file_name': 'i2c_1byte_continuous.py',
-  'ino_name': '1byte',
-}
-
-throuput_block_ack_continuous = {'base_dir_FET':'/home/pi/workspace/I2C_throuput_block_ack_continuous(FET)/',
-       'base_dir_MM':'/home/pi/workspace/I2C_throuput_block_ack_continuous(MM)/',
-       'base_dir_reg_div':'/home/pi/workspace/I2C_throuput_block_ack_continuous(reg_div)/',
-       'speed_hz': range(10000, 300001, 1000),
-       'file_name': 'i2c_throuput_block_ack_continuous.py',
-       'ino_name': 'throuput',
-       }
-
-proc_time_continuous = {'base_dir_FET':'/home/pi/workspace/I2C_proc_time_continuous(FET)/',
-       'base_dir_MM':'/home/pi/workspace/I2C_proc_time_continuous(MM)/',
-       'base_dir_reg_div':'/home/pi/workspace/I2C_proc_time_continuous(reg_div)/',
-       'speed_hz': range(233000, 300001, 1000),
-       'file_name': 'i2c_measure_proc_time_continuous.py',
-       'ino_name': 'proc_time',
-       }
+import json
 
 if __name__ == '__main__':
   try:
-    run_settings = None
-    # どのスクリプトを呼び出すか決定
+    with open(os.path.abspath("../configration.json"), mode = 'r') as f:
+      config = json.load(f)
+
+    data_dir_path_base = os.path.abspath(config['measured_data_path'])
+    sketches_dir_path = os.path.abspath(config['sketches_path'])
+    platformio_src_path = os.path.abspath(config['PlatformIO_src_path'])
+    device = ''
+    protocol = ''
+    exp_type = ''
+    level_shift = ''
+
+
+    # どのデバイスの実験を行うか決定
     while True:
-      print('Please set select script to run.')
-      print('1...1_byte  2...proc_time 3...throuput_block_ack')
+      print('Select device to measure.')
+      print('1: Arduino_UNO 2: ESP-WROOM-32')
       cmd = input('> ')
-      if cmd[0] == '1':
-        run_settings = one_byte_continuous
+      if cmd == 1:
+        device = 'Arduino_UNO'
         break
-      elif cmd[0] == '2':
-        run_settings = proc_time_continuous
-        break
-      elif cmd[0] == '3':
-        run_settings = throuput_block_ack_continuous
+      elif cmd == 2:
+        device = 'ESP-WROOM-32'
         break
       else:
         print('Oops! Wrong command.')
+        print('\n')
 
-    # 結果の保存場所の指定
+    # どのデバイスの実験を行うか決定
     while True:
-      print('Please set select level_shift_way.')
-      print('level_shift_way: 1...FET  2...MM  3...reg_div')
+      print('Select protocol to measure.')
+      print('1: SPI 2: I2C 3: UART')
       cmd = input('> ')
-      if cmd[0] == '1':
-        base_dir = run_settings['base_dir_FET']
+      if cmd == 1:
+        protocol = 'SPI'
+        config = config['SPI']
         break
-      elif cmd[0] == '2':
-        base_dir = run_settings['base_dir_MM']
+      elif cmd == 2:
+        protocol = 'I2C'
+        config = config['I2C']
         break
-      elif cmd[0] == '3':
-        base_dir = run_settings['base_dir_reg_div']
+      elif cmd == 3:
+        protocol = 'UART'
+        config = config['UART']
         break
       else:
         print('Oops! Wrong command.')
+        print('\n')
 
-    for speed_hz in run_settings['speed_hz']:
-      # 速度の変更
-      baudrate = 'baudrate=' + str(speed_hz)
-      subprocess.call(['sudo', 'modprobe', '-r', 'i2c_bcm2708'])
-      subprocess.call(['sudo', 'modprobe', 'i2c_bcm2708', baudrate])
+    # 何の実験を行うか決定
+    if protocol == 'I2C':
+      # I2Cの時はproc_timeを測れる
+      while True:
+        print('What do you want to measure?')
+        print('1...delay  2...throughput 3...proc_time')
+        cmd = input('> ')
+        if cmd == 1:
+          data_folder_path = 'delay'
+          config = config['delay']
+          break
+        elif cmd == 2:
+          data_folder_path = 'throughput'
+          config = config['throughput']
+          break
+        elif cmd == 3:
+          data_folder_path = 'proc_time'
+          config = config['proc_time']
+          break
+        else:
+          print('Oops! Wrong command.')
+          print('\n')
+    else:
+      # I2C以外の時はproc_timeを測る必要がないので選択肢から除外
+      while True:
+        print('What do you want to measure?')
+        print('1...delay  2...throughput')
+        cmd = input('> ')
+        if cmd == 1:
+          exp_type = 'delay'
+          config = config['delay']
+          break
+        elif cmd == 2:
+          exp_type = 'throughput'
+          config = config['throughput']
+          break
+        else:
+          print('Oops! Wrong command.')
+          print('\n')
 
-      # Arduinoのスケッチを読み込み
-      print('Start marging sketch...')
-      code = ''
-      with open(run_settings['ino_name'] + '_upper.txt', mode = 'r') as fh:
-        code = code + fh.read()
-      code = code[:-1] + str(speed_hz)
-      with open(run_settings['ino_name'] + '_lower.txt', mode = 'r') as fh:
-        code = code + fh.read()
+    # 何のレベルシフト方法を用いるか決定
+    while True:
+      print('Select way of level shifting.')
+      print('1: level_shift(2N7000)  2: level_shift(MM)  3: voltage_divider')
+      cmd = input('> ')
+      if cmd == 1:
+        level_shift = '2N7000'
+        break
+      elif cmd == 2:
+        level_shift = 'MM'
+        break
+      elif cmd == 3:
+        level_shift = 'voltage_driver'
+        break
+      else:
+        print('Oops! Wrong command.')
+        print('\n')
+
+    # 実験するボーレートを取得
+    speed_hz_list = eval(config['speed_hz'])
+
+    # 実験スクリプトのパスを取得
+    script_path = protocol + '/' + config['file_name']
+
+    # データ記録用フォルダを生成
+    data_dir_path = data_dir_path_base + device + '/' + protocol + '/' + exp_type + '/' + level_shift + '/'
+    try:
+      os.mkdir(data_dir_path)
+      os.mkdir(png_path)
+    except FileExistsError:
+      pass
+
+    #####################################################
+    # 実験開始
+    #####################################################
+
+
+    for speed_hz in speed_hz_list:
+      if protocol == 'I2C':
+        # Raspberry PiのI2Cでの通信速度を変更
+        baudrate = 'baudrate=' + str(speed_hz)
+        subprocess.call(['sudo', 'modprobe', '-r', 'i2c_bcm2708'])
+        subprocess.call(['sudo', 'modprobe', 'i2c_bcm2708', baudrate])
 
       # Arduinoのスケッチを作成
-      with open('src/sketch.ino', mode = 'w') as fh:
+      print('Creating sketch...')
+      sketch_path = sketches_dir_path + protocol + '/' + config['sketch_name'][:-4] + '/' + config['sketch_name']
+      with open(os.path.abspath(sketch_path), mode = 'r') as fh:
+        code = fh.read()
+      if protocol == 'SPI':
+        split_pos = code.find('SPISettings settings(') + 21
+        codes = [code[:split_pos], code[split_pos:]]
+      elif protocol == 'I2C':
+        split_pos = code.find('Wire.setClock(') + 14
+        codes = [code[:split_pos], code[split_pos:]]
+      elif protocol == 'UART':
+        split_pos = code.find('Serial.begin(') + 13
+        codes = [code[:split_pos], code[split_pos:]]
+      code = codes[0] + str(speed_hz) + codes[1]
+      with open(platformio_src_path + 'sketch.ino', mode = 'w') as fh:
         fh.write(code)
+
       # アップロード
-      print('uploading...')
+      print('Uploading...')
       up_proc = subprocess.Popen(['platformio', 'run'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       for line in iter(up_proc.stdout.readline, b''):
         print(line)
       # 終わるまで待つ
       up_proc.wait()
-      print('uploaded!')
+
+      print('Successfully uploaded!')
       time.sleep(2)
 
       # 実際の送受信スクリプトを実行
-      if run_settings == proc_time_continuous:
-        print('execute experiment...')
+      if exp_type == 'proc_time':
+        print('Executing script for the experiment...')
         console = subprocess.Popen(["platformio serialports monitor -p /dev/ttyACM0 -b 9600"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         time.sleep(5)
         start_cmd_time = time.time()
-        proc = subprocess.Popen(['python3', run_settings['file_name'], str(speed_hz)])
+        proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
 
         # コンソールから結果を記録
         rcv_console = []
@@ -136,7 +202,7 @@ if __name__ == '__main__':
         proc.terminate()
 
         # ファイルに出力
-        file_path = base_dir + str(speed_hz) + 'Hz_10000bytes_i2c_measure_proc_time.txt'
+        file_path = data_dir_path + str(speed_hz) + 'Hz.txt'
         with open(file_path, mode = 'a') as fh:
           for line in rcv_console:
             fh.write(line)
@@ -144,9 +210,13 @@ if __name__ == '__main__':
         time.sleep(3)
 
       else:
-        print('execute experiment...')
-        proc = subprocess.Popen(['python3', run_settings['file_name'], base_dir, str(speed_hz)])
+        print('Executing script for the experiment...')
+        proc = subprocess.Popen(['python3', script_path, data_dir_path, str(speed_hz)])
         proc.wait()
+
+      # ログを消す
+      proc = subprocess.call(['clear'])
+      proc.wait()
 
     sys.exit(0)
   except KeyboardInterrupt:

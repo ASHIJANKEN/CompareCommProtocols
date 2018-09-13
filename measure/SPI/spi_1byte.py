@@ -1,33 +1,35 @@
 # -*- coding: utf-8 -*-
-import sys
-import smbus
-import subprocess
-import random
 import time
+import sys
+import subprocess
+import spidev
+import random
 
-SLAVE_ADDRESS = 0x40
-
-# I2Cバスにマスタとして接続
-bus = smbus.SMBus(1)
+CE = 0
+spi = spidev.SpiDev()
+spi.open(0,CE)
+spi.mode = 0b01
 
 def getdata(send_bytes):
+  # 受信用のダミーデータを加える
+  send_bytes.append(0)
+
+  # 送受信・計測
   start_time = time.time()
-  bus.write_i2c_block_data(SLAVE_ADDRESS, 0, send_bytes)
-  result = bus.read_i2c_block_data(SLAVE_ADDRESS,1,1)
+  result = spi.xfer2(send_bytes)
   end_time = time.time()
 
-  return result[0], end_time - start_time
+  return result[1], end_time - start_time
 
 if __name__ == '__main__':
   try:
     argvs = sys.argv
-    base_dir = argvs[1]
-    speed_hz = argvs[2]
+    data_dir = argvs[1]
+    spi.max_speed_hz = (int)argvs[2]
 
     for send_bytes in [10000]:
-
-      #記録ファイルの生成
-      file_name = base_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes_i2c_1byte.txt'
+      # 記録ファイルの生成
+      file_name = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
       with open(file_name, mode = 'w', encoding = 'utf-8') as fh:
         pass
 
@@ -38,6 +40,8 @@ if __name__ == '__main__':
 
       # send_bytes回の試行
       for i in range(send_bytes):
+        # SPIレジスタのクリーンアップ
+        getdata([0])
 
         # データの送信
         result, execution_time = getdata([send[i]])
@@ -49,11 +53,10 @@ if __name__ == '__main__':
         with open(file_name, mode = 'a', encoding = 'utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
 
-      # ログを消す
-      proc = subprocess.Popen(['clear'])
-      proc.wait()
       print('Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
+    spi.close()
     sys.exit(0)
   except KeyboardInterrupt:
+    spi.close()
     sys.exit(0)

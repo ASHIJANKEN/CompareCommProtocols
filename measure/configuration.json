@@ -1,0 +1,50 @@
+{
+  "measured_data_path": "../measured_data/",
+  "sketches_path": "../sketches/",
+  "PlatformIO_src_path": "",
+
+
+  "SPI": {
+    "delay": {
+      "file_name": "delay.py",
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "sketch_name": "Delay.ino"
+    },
+    "throughput": {
+      "file_name": "throughput.py",
+      "speed_hz": "",
+      "sketch_name": "Throughput.ino"
+    }
+  },
+
+  "I2C": {
+    "delay": {
+      "file_name": "delay.py",
+      "speed_hz": "range(10000, 300001, 1000)",
+      "sketch_name": "Delay.ino"
+    },
+    "throughput": {
+      "file_name": "throughput.py",
+      "speed_hz": "range(10000, 300001, 1000)",
+      "sketch_name": "Throughput.ino"
+    },
+    "proc_time": {
+      "file_name": "proc_time.py",
+      "speed_hz": "range(233000, 300001, 1000)",
+      "sketch_name": "ProcTime.ino"
+    }
+  },
+
+  "UART": {
+    "delay": {
+      "file_name": "delay.py",
+      "speed_hz": "",
+      "sketch_name": "Delay.ino"
+    },
+    "throughput": {
+      "file_name": "throughput.py",
+      "speed_hz": "",
+      "sketch_name": "Throughput.ino"
+    }
+  }
+}

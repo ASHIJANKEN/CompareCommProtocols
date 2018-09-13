@@ -27,7 +27,7 @@ const int8_t rcv_vals[128] =
 
 void setup (void) {
   // シリアル通信を設定
-  Serial.begin(14400);
+  Serial.begin();
 }
 
 void loop(){
