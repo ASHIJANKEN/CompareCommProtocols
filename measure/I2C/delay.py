@@ -27,8 +27,8 @@ if __name__ == '__main__':
     for send_bytes in [10000]:
 
       #記録ファイルの生成
-      file_name = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes_i2c_1byte.txt'
-      with open(file_name, mode = 'w', encoding = 'utf-8') as fh:
+      file_path = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
+      with open(file_path, mode = 'w', encoding = 'utf-8') as fh:
         pass
 
       # 送信データの作成
@@ -45,14 +45,14 @@ if __name__ == '__main__':
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
 
-        print('{0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
-        with open(file_name, mode = 'a', encoding = 'utf-8') as fh:
+        print('[I2C delay] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
+        with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
 
       # ログを消す
       proc = subprocess.Popen(['clear'])
       proc.wait()
-      print('Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
+      print('[I2C delay] Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
     sys.exit(0)
   except KeyboardInterrupt:

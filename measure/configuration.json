@@ -3,48 +3,39 @@
   "sketches_path": "../sketches/",
   "PlatformIO_src_path": "",
 
-
-  "SPI": {
-    "delay": {
-      "file_name": "delay.py",
-      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
-      "sketch_name": "Delay.ino"
+  "delay": {
+    "script_name": "delay.py",
+    "sketch_name": "Delay.ino",
+    "SPI": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))"
     },
-    "throughput": {
-      "file_name": "throughput.py",
-      "speed_hz": "",
-      "sketch_name": "Throughput.ino"
+    "I2C": {
+      "speed_hz": "range(10000, 300001, 1000)"
+    },
+    "UART": {
+      "speed_hz": "range(10000, 8000001, 1000)"
     }
   },
 
-  "I2C": {
-    "delay": {
-      "file_name": "delay.py",
-      "speed_hz": "range(10000, 300001, 1000)",
-      "sketch_name": "Delay.ino"
+  "throughput": {
+    "script_name": "throughput.py",
+    "sketch_name": "Throughput.ino",
+    "SPI": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))"
     },
-    "throughput": {
-      "file_name": "throughput.py",
-      "speed_hz": "range(10000, 300001, 1000)",
-      "sketch_name": "Throughput.ino"
+    "I2C": {
+      "speed_hz": "range(10000, 300001, 1000)"
     },
-    "proc_time": {
-      "file_name": "proc_time.py",
-      "speed_hz": "range(233000, 300001, 1000)",
-      "sketch_name": "ProcTime.ino"
+    "UART": {
+      "speed_hz": "range(10000, 3000001, 1000)"
     }
   },
 
-  "UART": {
-    "delay": {
-      "file_name": "delay.py",
-      "speed_hz": "",
-      "sketch_name": "Delay.ino"
-    },
-    "throughput": {
-      "file_name": "throughput.py",
-      "speed_hz": "",
-      "sketch_name": "Throughput.ino"
+  "proc_time": {
+    "script_name": "proc_time.py",
+    "sketch_name": "ProcTime.ino",
+    "I2C": {
+      "speed_hz": "range(233000, 300001, 1000)"
     }
   }
 }

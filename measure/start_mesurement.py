@@ -48,15 +48,12 @@ if __name__ == '__main__':
       cmd = input('> ')
       if cmd == 1:
         protocol = 'SPI'
-        config = config['SPI']
         break
       elif cmd == 2:
         protocol = 'I2C'
-        config = config['I2C']
         break
       elif cmd == 3:
         protocol = 'UART'
-        config = config['UART']
         break
       else:
         print('Oops! Wrong command.')
@@ -71,15 +68,12 @@ if __name__ == '__main__':
         cmd = input('> ')
         if cmd == 1:
           data_folder_path = 'delay'
-          config = config['delay']
           break
         elif cmd == 2:
           data_folder_path = 'throughput'
-          config = config['throughput']
           break
         elif cmd == 3:
           data_folder_path = 'proc_time'
-          config = config['proc_time']
           break
         else:
           print('Oops! Wrong command.')
@@ -92,11 +86,9 @@ if __name__ == '__main__':
         cmd = input('> ')
         if cmd == 1:
           exp_type = 'delay'
-          config = config['delay']
           break
         elif cmd == 2:
           exp_type = 'throughput'
-          config = config['throughput']
           break
         else:
           print('Oops! Wrong command.')
@@ -121,16 +113,15 @@ if __name__ == '__main__':
         print('\n')
 
     # 実験するボーレートを取得
-    speed_hz_list = eval(config['speed_hz'])
+    speed_hz_list = eval(config[exp_type][protocol]['speed_hz'])
 
     # 実験スクリプトのパスを取得
-    script_path = protocol + '/' + config['file_name']
+    script_path = protocol + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
     data_dir_path = data_dir_path_base + device + '/' + protocol + '/' + exp_type + '/' + level_shift + '/'
     try:
-      os.mkdir(data_dir_path)
-      os.mkdir(png_path)
+      os.mkdirs(data_dir_path)
     except FileExistsError:
       pass
 
@@ -148,7 +139,8 @@ if __name__ == '__main__':
 
       # Arduinoのスケッチを作成
       print('Creating sketch...')
-      sketch_path = sketches_dir_path + protocol + '/' + config['sketch_name'][:-4] + '/' + config['sketch_name']
+      sketch_name = config[exp_type][protocol]['sketch_name']
+      sketch_path = sketches_dir_path + protocol + '/' + sketch_name[:-4] + '/' + sketch_name
       with open(os.path.abspath(sketch_path), mode = 'r') as fh:
         code = fh.read()
       if protocol == 'SPI':

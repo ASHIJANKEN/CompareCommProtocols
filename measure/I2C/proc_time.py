@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
-        print('{0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
+        print('[I2C proc_time] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
 
       # ログを消す
       proc = subprocess.Popen(['clear'])

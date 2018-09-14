@@ -21,13 +21,13 @@ if __name__ == '__main__':
   try:
     argvs = sys.argv
     base_dir = argvs[1]
-    speed_hz = argvs[2]
+    speed_hz = (int)argvs[2]
 
     for send_bytes in [10000]:
 
       #記録ファイルの生成
-      file_name = base_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes_uart_1byte.txt'
-      with open(file_name, mode = 'w', encoding = 'utf-8') as fh:
+      file_path = base_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
+      with open(file_path, mode = 'w', encoding = 'utf-8') as fh:
         pass
 
       # 送信データの作成
@@ -44,14 +44,14 @@ if __name__ == '__main__':
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
 
-        print('{0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
-        with open(file_name, mode = 'a', encoding = 'utf-8') as fh:
+        print('[UART delay] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
+        with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
 
       # ログを消す
       proc = subprocess.Popen(['clear'])
       proc.wait()
-      print('Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
+      print('[UART delay] Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
     sys.exit(0)
   except KeyboardInterrupt:

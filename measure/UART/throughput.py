@@ -13,7 +13,7 @@ notice_pin = 18
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(notice_pin, GPIO.OUT)
 
-def getdata(send_bytes, max_speed_hz):
+def getdata(send_bytes, speed_hz):
   # send_bytesをxfer2で送信できるサイズに分割する
   send_blocks = [send_bytes[i: i+max_data_length] for i in range(0, len(send_bytes), max_data_length)]
 
@@ -21,7 +21,7 @@ def getdata(send_bytes, max_speed_hz):
   # 送受信・計測
   ###############################################
   result = []
-  with serial.Serial('/dev/ttyS0',max_speed_hz,timeout=100) as ser:
+  with serial.Serial('/dev/ttyS0', speed_hz,timeout=100) as ser:
     # 送信スタートの合図
     GPIO.output(notice_pin, True)
     start_time = time.time()
@@ -50,42 +50,40 @@ def getdata(send_bytes, max_speed_hz):
 if __name__ == '__main__':
   try:
     argvs = sys.argv
-    base_dir = argvs[1]
-    speed_hz = argvs[2]
+    data_dir = argvs[1]
+    speed_hz = (int)argvs[2]
 
     # 送信データをファイルから読み込む
     with open('send_bytes.txt', mode = 'r', encoding = 'utf-8') as fh:
-      elms = fh.readlines()
-      #末尾改行文字を除去
-      elms = [i.rstrip() for i in elms]
-      #要素をintへ変換
-      elms =[int(i) for i in elms]
-      #default_send_bytesの長さをmax_data_lengthにする
-      leng = len(elms)
-      default_send_bytes = elms * (max_data_length // leng)
-      default_send_bytes = default_send_bytes + elms[0:(max_data_length % leng)]
+      send_bytes_pattern = fh.readlines()
 
-#     for send_bytes in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]:
-#     for send_bytes in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]:
+    # 末尾改行文字を除去
+    send_bytes_pattern = [i.rstrip() for i in send_bytes_pattern]
+    # 要素をintへ変換
+    send_bytes_pattern = [int(i) for i in send_bytes_pattern]
+    # send_bytes_patternの長さをmax_data_lengthにする
+    leng = len(send_bytes_pattern)
+    send_bytes_pattern *= (max_data_length // leng)
+    send_bytes_pattern += send_bytes_pattern[0:(max_data_length % leng)]
+
     for send_bytes in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
       #記録ファイルの生成
-      file_name = base_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes_uart_throuput.txt'
-      with open(file_name, mode = 'w', encoding = 'utf-8') as fh:
+      file_path = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
+      with open(file_path, mode = 'w', encoding = 'utf-8') as fh:
         pass
 
       # 送信データの作成
-      send = []
-      send = default_send_bytes * (send_bytes // len(default_send_bytes))
-      send = send + default_send_bytes[0:(send_bytes % len(default_send_bytes))]
+      send = send_bytes_pattern * (send_bytes // len(send_bytes_pattern))
+      send = send + send_bytes_pattern[0:(send_bytes % len(send_bytes_pattern))]
 
-      # 1k回の試行
+      # 1,000回の試行
       for i in range(1000):
 
         # データの送信
         execution_time, err = getdata(send, speed_hz)
 
-        print('{0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
-        with open(file_name, mode = 'a', encoding = 'utf-8') as fh:
+        print('[UART throughput] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
+        with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
         if execution_time > 100:
           print("timeout!")
@@ -94,7 +92,7 @@ if __name__ == '__main__':
       # ログを消す
       proc = subprocess.Popen(['clear'])
       proc.wait()
-      print('Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
+      print('[UART throughput] Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
     sys.exit(0)
   except KeyboardInterrupt:
