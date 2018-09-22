@@ -106,7 +106,7 @@ if __name__ == '__main__':
         level_shift = 'MM'
         break
       elif cmd == 3:
-        level_shift = 'voltage_driver'
+        level_shift = 'voltage_divider'
         break
       else:
         print('Oops! Wrong command.')
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     script_path = protocol + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
-    data_dir_path = data_dir_path_base + device + '/' + protocol + '/' + exp_type + '/' + level_shift + '/'
+    data_dir_path = data_dir_path_base + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
     try:
       os.mkdirs(data_dir_path)
     except FileExistsError:
