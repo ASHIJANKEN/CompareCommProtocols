@@ -1,6 +1,23 @@
+# OSX
 .DS_Store
+
+# Build
+**/build/
+**/*.a
+**/*.o
+**/*.old
+
+# PlatformIO
+.pioenvs
+.piolibdeps
+
+# Eclipse
 *.pyc
 .settings/
 .project
 .pydevproject
+
+# Large data folder
 measured_data/
+
+

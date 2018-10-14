@@ -1,4 +1,4 @@
-void setup (void) {
+void setup(){
   // シリアル通信を設定
   Serial.begin();
 }

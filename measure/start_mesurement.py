@@ -11,31 +11,33 @@ import subprocess
 import time
 import signal
 import json
+import re
 
 if __name__ == '__main__':
   try:
-    with open(os.path.abspath("../configration.json"), mode = 'r') as f:
+    with open(os.path.abspath('../configuration.json'), mode='r') as f:
       config = json.load(f)
+    with open(os.path.abspath('path_config.json'), mode='r') as f:
+      path_config = json.load(f)
 
-    data_dir_path_base = os.path.abspath(config['measured_data_path'])
-    sketches_dir_path = os.path.abspath(config['sketches_path'])
-    platformio_src_path = os.path.abspath(config['PlatformIO_src_path'])
+    data_dir_path_base = os.path.abspath(path_config['measured_data_path'])
+    receiver_src_path = os.path.abspath(path_config['receiver_src_path'])
+    platformio_src_path = os.path.abspath(path_config['PlatformIO_src_path'])
     device = ''
     protocol = ''
     exp_type = ''
     level_shift = ''
 
-
     # どのデバイスの実験を行うか決定
     while True:
       print('Select device to measure.')
-      print('1: Arduino_UNO 2: ESP-WROOM-32')
+      print('1: Arduino_UNO 2: ESP32-DevKitC')
       cmd = input('> ')
       if cmd == 1:
         device = 'Arduino_UNO'
         break
       elif cmd == 2:
-        device = 'ESP-WROOM-32'
+        device = 'ESP32-DevKitC'
         break
       else:
         print('Oops! Wrong command.')
@@ -63,17 +65,17 @@ if __name__ == '__main__':
     if protocol == 'I2C':
       # I2Cの時はproc_timeを測れる
       while True:
-        print('What do you want to measure?')
+        print('Select what you want to measure.')
         print('1...delay  2...throughput 3...proc_time')
         cmd = input('> ')
         if cmd == 1:
-          data_folder_path = 'delay'
+          exp_type = 'delay'
           break
         elif cmd == 2:
-          data_folder_path = 'throughput'
+          exp_type = 'throughput'
           break
         elif cmd == 3:
-          data_folder_path = 'proc_time'
+          exp_type = 'proc_time'
           break
         else:
           print('Oops! Wrong command.')
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     else:
       # I2C以外の時はproc_timeを測る必要がないので選択肢から除外
       while True:
-        print('What do you want to measure?')
+        print('Select what you want to measure.')
         print('1...delay  2...throughput')
         cmd = input('> ')
         if cmd == 1:
@@ -97,7 +99,7 @@ if __name__ == '__main__':
     # 何のレベルシフト方法を用いるか決定
     while True:
       print('Select way of level shifting.')
-      print('1: level_shift(2N7000)  2: level_shift(MM)  3: voltage_divider')
+      print('1: level_shift(2N7000)  2: level_shift(MM)  3: voltage_divider  4: None')
       cmd = input('> ')
       if cmd == 1:
         level_shift = '2N7000'
@@ -108,27 +110,35 @@ if __name__ == '__main__':
       elif cmd == 3:
         level_shift = 'voltage_divider'
         break
+      elif cmd == 4:
+        level_shift = 'None'
+        break
       else:
         print('Oops! Wrong command.')
         print('\n')
 
     # 実験するボーレートを取得
     speed_hz_list = eval(config[exp_type][protocol]['speed_hz'])
+    speed_hz_list.sort()
 
     # 実験スクリプトのパスを取得
-    script_path = protocol + '/' + config[exp_type][protocol]['script_name']
+    script_path = protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
-    data_dir_path = data_dir_path_base + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
+    data_dir_path = data_dir_path_base + '/' + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
     try:
-      os.mkdirs(data_dir_path)
-    except FileExistsError:
-      pass
+      os.makedirs(data_dir_path)
+    except OSError as e:
+      if e.errno != os.errno.EEXIST:
+        raise
+
+    # デバイスに書き込むソースコードのパスを取得
+    receiver_src_name = config[exp_type][protocol]['receiver_src_name'][device]
+    receiver_src_path = receiver_src_path + '/' + protocol + '/' + device + '/' + exp_type[0].upper() + exp_type[1:] + '/' + receiver_src_name
 
     #####################################################
     # 実験開始
     #####################################################
-
 
     for speed_hz in speed_hz_list:
       if protocol == 'I2C':
@@ -137,40 +147,56 @@ if __name__ == '__main__':
         subprocess.call(['sudo', 'modprobe', '-r', 'i2c_bcm2708'])
         subprocess.call(['sudo', 'modprobe', 'i2c_bcm2708', baudrate])
 
-      # Arduinoのスケッチを作成
-      print('Creating sketch...')
-      sketch_name = config[exp_type][protocol]['sketch_name']
-      sketch_path = sketches_dir_path + protocol + '/' + sketch_name[:-4] + '/' + sketch_name
-      with open(os.path.abspath(sketch_path), mode = 'r') as fh:
+      # Arduinoなどに書き込むソースコードを作成
+      print('Creating source code to write...')
+      with open(receiver_src_path, mode='r') as fh:
         code = fh.read()
       if protocol == 'SPI':
-        split_pos = code.find('SPISettings settings(') + 21
-        codes = [code[:split_pos], code[split_pos:]]
+        pass
       elif protocol == 'I2C':
         split_pos = code.find('Wire.setClock(') + 14
-        codes = [code[:split_pos], code[split_pos:]]
+        code = code[:split_pos] + str(speed_hz) + code[split_pos:]
       elif protocol == 'UART':
         split_pos = code.find('Serial.begin(') + 13
-        codes = [code[:split_pos], code[split_pos:]]
-      code = codes[0] + str(speed_hz) + codes[1]
-      with open(platformio_src_path + 'sketch.ino', mode = 'w') as fh:
+        code = code[:split_pos] + str(speed_hz) + code[split_pos:]
+      receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
+      with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
         fh.write(code)
 
       # アップロード
       print('Uploading...')
-      up_proc = subprocess.Popen(['platformio', 'run'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-      for line in iter(up_proc.stdout.readline, b''):
-        print(line)
-      # 終わるまで待つ
-      up_proc.wait()
+      if protocol == 'UART' and device == 'Arduino_UNO':
+        rts_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'ALT5'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        rts_proc.wait()
+
+        up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_UART'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(up_proc.stdout.readline, b''):
+          print(line)
+        # 終わるまで待つ
+        status = up_proc.wait()
+
+        in_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'IN'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        in_proc.wait()
+
+      else:
+        up_proc = subprocess.Popen(['platformio', 'run', '-e', device], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(up_proc.stdout.readline, b''):
+          print(line)
+        # 終わるまで待つ
+        status = up_proc.wait()
+
+      time.sleep(1)
+      if status != 0:
+        print('[ERROR] Upload failed!')
+        sys.exit(0)
 
       print('Successfully uploaded!')
-      time.sleep(2)
+      time.sleep(1)
 
       # 実際の送受信スクリプトを実行
       if exp_type == 'proc_time':
         print('Executing script for the experiment...')
-        console = subprocess.Popen(["platformio serialports monitor -p /dev/ttyACM0 -b 9600"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        console = subprocess.Popen(['platformio serialports monitor -p /dev/ttyACM0 -b 9600'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         time.sleep(5)
         start_cmd_time = time.time()
         proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
@@ -180,14 +206,14 @@ if __name__ == '__main__':
         for line in iter(console.stdout.readline, b''):
           if len(rcv_console) < 10002:
             if time.time() - start_cmd_time > 85:
-              print("timeout!")
+              print('timeout!')
               break
             rcv_console.append(line)
           else:
             rcv_console.pop(0)
             rcv_console.pop(0)
             rcv_console = [i[:-2] for i in rcv_console]
-            rcv_console = [i+'\n' for i in rcv_console]
+            rcv_console = [i + '\n' for i in rcv_console]
             break
         console.send_signal(signal.SIGINT)
         console.terminate()
@@ -195,7 +221,7 @@ if __name__ == '__main__':
 
         # ファイルに出力
         file_path = data_dir_path + str(speed_hz) + 'Hz.txt'
-        with open(file_path, mode = 'a') as fh:
+        with open(file_path, mode='a') as fh:
           for line in rcv_console:
             fh.write(line)
 
@@ -207,8 +233,7 @@ if __name__ == '__main__':
         proc.wait()
 
       # ログを消す
-      proc = subprocess.call(['clear'])
-      proc.wait()
+      subprocess.call(['clear'])
 
     sys.exit(0)
   except KeyboardInterrupt:

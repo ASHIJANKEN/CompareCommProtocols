@@ -51,7 +51,7 @@ if __name__ == '__main__':
   try:
     argvs = sys.argv
     data_dir = argvs[1]
-    speed_hz = (int)argvs[2]
+    speed_hz = int(argvs[2])
 
     # 送信データをファイルから読み込む
     with open('send_bytes.txt', mode = 'r', encoding = 'utf-8') as fh:

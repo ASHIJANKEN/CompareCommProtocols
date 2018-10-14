@@ -1,7 +1,11 @@
 #define NOTICE_PIN 2
+#define LENGTH_READ 0
+#define DATA_READ 1
 
+static int status = LENGTH_READ;
+static int16_t lng = 0;
 static unsigned long rcv_count = 0;
-static byte a = 0;
+static byte err = 0;
 
 const int8_t rcv_vals[128] =
   {241, 187, 147, 213, 106, 157, 70, 187,
@@ -21,20 +25,41 @@ const int8_t rcv_vals[128] =
   17, 199, 15, 196, 66, 75, 244, 39,
   177, 95, 164, 175, 44, 107, 193, 208};
 
-void setup (void) {
+void setup(){
   // シリアル通信を設定
-  Serial.begin(14400);
+  Serial.begin();
 }
 
 void loop(){
   if(digitalRead(NOTICE_PIN) == false){
+    status = LENGTH_READ;
     rcv_count = 0;
+    err = 0;
   }
 }
 
 // シリアル割り込み処理
 void serialEvent(){
-  Serial.write(Serial.read() ^ (byte)rcv_vals[rcv_count%63]);
-  rcv_count++;
+  switch(status){
+    case LENGTH_READ:
+      lng = Serial.read();
+      status = DATA_READ;
+      break;
+    case DATA_READ:
+      // 受信エラーを計算
+      err |= (Serial.read() ^ (byte)rcv_vals[rcv_count&127]);
+      rcv_count++;
+
+      // 送信処理に入る
+      if(rcv_count==lng){
+        Serial.write(err);
+        // リセット処理
+        err = 0;
+        rcv_count = 0;
+        status = LENGTH_READ;
+      }
+
+      break;
+  }
 }
 

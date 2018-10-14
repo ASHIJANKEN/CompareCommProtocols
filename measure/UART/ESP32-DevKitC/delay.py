@@ -8,7 +8,14 @@ import random
 
 def getdata(send_bytes, max_speed_hz):
   result = []
-  with serial.Serial('/dev/ttyS0',max_speed_hz,timeout=100) as ser:
+  with serial.Serial(
+    port='/dev/ttyUSB0',
+    baudrate=max_speed_hz,
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=1,
+  ) as ser:
     start_time = time.time()
     ser.write(bytearray(send_bytes))
     result.append(ser.read(len(send_bytes)))
@@ -21,7 +28,7 @@ if __name__ == '__main__':
   try:
     argvs = sys.argv
     base_dir = argvs[1]
-    speed_hz = (int)argvs[2]
+    speed_hz = int(argvs[2])
 
     for send_bytes in [10000]:
 

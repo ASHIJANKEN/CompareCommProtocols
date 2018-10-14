@@ -1,0 +1,66 @@
+{
+  "delay": {
+    "SPI": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "delay.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Delay.ino",
+        "ESP32-DevKitC": "Delay.ino"
+      }
+    },
+    "I2C": {
+      "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "delay.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Delay.ino",
+        "ESP32-DevKitC": "Delay.c"
+      }
+    },
+    "UART": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "delay.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Delay.ino",
+        "ESP32-DevKitC": "Delay.ino"
+      }
+    }
+  },
+
+  "throughput": {
+    "SPI": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "throughput.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Throughput.ino",
+        "ESP32-DevKitC": "Throughput.ino"
+      }
+    },
+    "I2C": {
+      "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "throughput.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Throughput.ino",
+        "ESP32-DevKitC": "Throughput.c"
+      }
+    },
+    "UART": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "throughput.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "Throughput.ino",
+        "ESP32-DevKitC": "Throughput.ino"
+      }
+    }
+  },
+
+  "proc_time": {
+    "I2C": {
+      "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "proc_time.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "ProcTime.ino",
+        "ESP32-DevKitC": "ProcTime.c"
+      }
+    }
+  }
+}
