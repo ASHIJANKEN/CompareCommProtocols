@@ -5,7 +5,7 @@
       "script_name": "delay.py",
       "receiver_src_name": {
         "Arduino_UNO": "Delay.ino",
-        "ESP32-DevKitC": "Delay.ino"
+        "ESP32-DevKitC": "Delay.c"
       }
     },
     "I2C": {

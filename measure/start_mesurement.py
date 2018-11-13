@@ -13,8 +13,72 @@ import signal
 import json
 import re
 
+device = ''
+protocol = ''
+exp_type = ''
+level_shift = ''
+
+
+def upload_receiver_src():
+  if device == 'Arduino_UNO':
+    if device == 'UART':
+      rts_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'ALT5'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      rts_proc.wait()
+
+      up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      for line in iter(up_proc.stdout.readline, b''):
+        print(line)
+      # 終わるまで待つ
+      status = up_proc.wait()
+
+      in_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'IN'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      in_proc.wait()
+
+    else:
+      up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      for line in iter(up_proc.stdout.readline, b''):
+        print(line)
+      # 終わるまで待つ
+      status = up_proc.wait()
+
+  elif device == 'ESP32-DevKitC':
+    if protocol == 'SPI':
+      if upload_receiver_src.uploaded_once == True:
+        return 0
+
+    # Makefileのあるところまで移動
+    os.chdir(receiver_src_folder_path)
+
+    up_proc = subprocess.Popen(['make', '-j4', 'flash'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    for line in iter(up_proc.stdout.readline, b''):
+      print(line)
+    # 終わるまで待つ
+    status = up_proc.wait()
+
+    upload_receiver_src.uploaded_once = True
+
+    # 元の場所へ戻る
+    os.chdir(working_dir_path)
+
+  else:
+    pass
+
+
+  if status != 0:
+    print('[ERROR] Upload failed!')
+    sys.exit(0)
+
+  print('Successfully uploaded!')
+
+  return status
+upload_receiver_src.uploaded_once = False # This is for settings of ESP32-DevKitC(SPI)
+
+
 if __name__ == '__main__':
   try:
+    # カレントディレクトリパスを取得
+    working_dir_path = os.getcwd()
+
     with open(os.path.abspath('../configuration.json'), mode='r') as f:
       config = json.load(f)
     with open(os.path.abspath('path_config.json'), mode='r') as f:
@@ -23,10 +87,6 @@ if __name__ == '__main__':
     data_dir_path_base = os.path.abspath(path_config['measured_data_path'])
     receiver_src_path = os.path.abspath(path_config['receiver_src_path'])
     platformio_src_path = os.path.abspath(path_config['PlatformIO_src_path'])
-    device = ''
-    protocol = ''
-    exp_type = ''
-    level_shift = ''
 
     # どのデバイスの実験を行うか決定
     while True:
@@ -134,7 +194,8 @@ if __name__ == '__main__':
 
     # デバイスに書き込むソースコードのパスを取得
     receiver_src_name = config[exp_type][protocol]['receiver_src_name'][device]
-    receiver_src_path = receiver_src_path + '/' + protocol + '/' + device + '/' + exp_type[0].upper() + exp_type[1:] + '/' + receiver_src_name
+    receiver_src_folder_path = receiver_src_path + '/' + protocol + '/' + device + '/' + exp_type[0].upper() + exp_type[1:] + '/'
+    receiver_src_path = receiver_src_folder_path + receiver_src_name
 
     #####################################################
     # 実験開始
@@ -147,50 +208,33 @@ if __name__ == '__main__':
         subprocess.call(['sudo', 'modprobe', '-r', 'i2c_bcm2708'])
         subprocess.call(['sudo', 'modprobe', 'i2c_bcm2708', baudrate])
 
-      # Arduinoなどに書き込むソースコードを作成
+      # Arduinoなどに書き込むソースコードを作成(SPI除く)
       print('Creating source code to write...')
-      with open(receiver_src_path, mode='r') as fh:
-        code = fh.read()
-      if protocol == 'SPI':
+
+      if protocol == 'SPI' or device == 'ESP32-DevKitC':
         pass
-      elif protocol == 'I2C':
-        split_pos = code.find('Wire.setClock(') + 14
-        code = code[:split_pos] + str(speed_hz) + code[split_pos:]
-      elif protocol == 'UART':
-        split_pos = code.find('Serial.begin(') + 13
-        code = code[:split_pos] + str(speed_hz) + code[split_pos:]
-      receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
-      with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
-        fh.write(code)
+      else:
+        with open(receiver_src_path, mode='r') as fh:
+          code = fh.read()
+
+        if protocol == 'I2C':
+          split_pos = code.find('Wire.setClock(') + 14
+          code = code[:split_pos] + str(speed_hz) + code[split_pos:]
+        elif protocol == 'UART':
+          split_pos = code.find('Serial.begin(') + 13
+          code = code[:split_pos] + str(speed_hz) + code[split_pos:]
+        receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
+        with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
+          fh.write(code)
 
       # アップロード
       print('Uploading...')
-      if protocol == 'UART' and device == 'Arduino_UNO':
-        rts_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'ALT5'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        rts_proc.wait()
-
-        up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_UART'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        for line in iter(up_proc.stdout.readline, b''):
-          print(line)
-        # 終わるまで待つ
-        status = up_proc.wait()
-
-        in_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'IN'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        in_proc.wait()
-
-      else:
-        up_proc = subprocess.Popen(['platformio', 'run', '-e', device], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        for line in iter(up_proc.stdout.readline, b''):
-          print(line)
-        # 終わるまで待つ
-        status = up_proc.wait()
-
+      status = upload_receiver_src()
       time.sleep(1)
+
       if status != 0:
-        print('[ERROR] Upload failed!')
         sys.exit(0)
 
-      print('Successfully uploaded!')
       time.sleep(1)
 
       # 実際の送受信スクリプトを実行

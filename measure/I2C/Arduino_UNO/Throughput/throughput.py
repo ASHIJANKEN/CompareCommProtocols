@@ -11,9 +11,10 @@ max_data_length = 31
 # I2Cバスにマスタとして接続
 bus = smbus.SMBus(1)
 
+
 def getdata(send_bytes):
   # send_bytesをwrite_i2c_block_dataで送信できるサイズに分割する
-  send_blocks = [send_bytes[i: i+max_data_length] for i in range(0, len(send_bytes), max_data_length)]
+  send_blocks = [send_bytes[i: i + max_data_length] for i in range(0, len(send_bytes), max_data_length)]
 
   ###############################################
   # 送受信・計測
@@ -26,7 +27,7 @@ def getdata(send_bytes):
     bus.write_i2c_block_data(SLAVE_ADDRESS, 0, block)
     result = bus.read_i2c_block_data(SLAVE_ADDRESS, 1, 1)
 
-    #送受信誤りがあるかどうかを確認する
+    # 送受信誤りがあるかどうかを確認する
     err |= result[0]
 
   end_time = time.time()
@@ -35,6 +36,7 @@ def getdata(send_bytes):
 
   return end_time - start_time, err
 
+
 if __name__ == '__main__':
   try:
     argvs = sys.argv
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     speed_hz = argvs[2]
 
     # 送信データをファイルから読み込む
-    with open('send_bytes.txt', mode = 'r', encoding = 'utf-8') as fh:
+    with open('send_bytes.txt', mode='r', encoding='utf-8') as fh:
       send_bytes_pattern = fh.readlines()
 
     # 末尾改行文字を除去
@@ -55,9 +57,9 @@ if __name__ == '__main__':
     send_bytes_pattern += send_bytes_pattern[0:(max_data_length % leng)]
 
     for send_bytes in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
-      #記録ファイルの生成
+      # 記録ファイルの生成
       file_path = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
-      with open(file_path, mode = 'w', encoding = 'utf-8') as fh:
+      with open(file_path, mode='w', encoding='utf-8') as fh:
         pass
 
       # 送信データの作成
@@ -70,12 +72,11 @@ if __name__ == '__main__':
         execution_time, err = getdata(send)
 
         print('[I2C throughput] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, speed_hz, execution_time, err))
-        with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
+        with open(file_path, mode='a', encoding='utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
 
       # ログを消す
-      proc = subprocess.Popen(['clear'])
-      proc.wait()
+      subprocess.call(['clear'])
       print('[I2C throughput] Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
     sys.exit(0)
