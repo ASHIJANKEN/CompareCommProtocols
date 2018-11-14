@@ -85,6 +85,7 @@ if __name__ == '__main__':
       path_config = json.load(f)
 
     data_dir_path_base = os.path.abspath(path_config['measured_data_path'])
+    sender_src_path = os.path.abspath(path_config['sender_src_path'])
     receiver_src_path = os.path.abspath(path_config['receiver_src_path'])
     platformio_src_path = os.path.abspath(path_config['PlatformIO_src_path'])
 
@@ -182,7 +183,7 @@ if __name__ == '__main__':
     speed_hz_list.sort()
 
     # 実験スクリプトのパスを取得
-    script_path = protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
+    script_path = sender_src_path + '/' + protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
     data_dir_path = data_dir_path_base + '/' + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
@@ -211,7 +212,7 @@ if __name__ == '__main__':
       # Arduinoなどに書き込むソースコードを作成(SPI除く)
       print('Creating source code to write...')
 
-      if protocol == 'SPI' or device == 'ESP32-DevKitC':
+      if protocol == 'SPI':
         pass
       else:
         with open(receiver_src_path, mode='r') as fh:
@@ -221,11 +222,19 @@ if __name__ == '__main__':
           split_pos = code.find('Wire.setClock(') + 14
           code = code[:split_pos] + str(speed_hz) + code[split_pos:]
         elif protocol == 'UART':
-          split_pos = code.find('Serial.begin(') + 13
+          if device == 'Arduino_UNO':
+            split_pos = code.find('Serial.begin(') + 13
+          elif device == 'ESP32-DevKitC':
+            split_pos = code.find('.baud_rate = ') + 13
           code = code[:split_pos] + str(speed_hz) + code[split_pos:]
         receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
-        with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
-          fh.write(code)
+
+        if device == 'Arduino_UNO':
+          with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
+            fh.write(code)
+        elif device == 'ESP32-DevKitC':
+          with open(receiver_src_folder_path + 'main/' + receiver_src_name, mode='w') as fh:
+            fh.write(code)
 
       # アップロード
       print('Uploading...')

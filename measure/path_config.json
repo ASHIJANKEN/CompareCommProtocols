@@ -1,6 +1,7 @@
 {
   "measured_data_path": "../measured_data/",
   "analyzed_data_path": "../analyzed_data/",
+  "sender_src_path": "sender_src/",
   "receiver_src_path": "receiver_src/",
   "PlatformIO_src_path": "src/"
 }
