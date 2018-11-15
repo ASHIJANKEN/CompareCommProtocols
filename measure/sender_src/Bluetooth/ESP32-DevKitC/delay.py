@@ -6,28 +6,19 @@ import bluetooth
 import subprocess
 import random
 
-def getdata(send_bytes, max_speed_hz):
-  port = 1
-  client_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-  client_sock.connect((targetBluetoothMacAddress, port))
+server_address = 'b8:27:eb:44:0d:88'
 
+def getdata(client, send_bytes, max_speed_hz):
   start_time = time.time()
   # Send data
-  client_sock.send("hello!!")
-  # client_sock.send(send_bytes)
+  client.send(['h','e','l','l','o'])
+  # client.send(send_bytes)
 
-  server_sock.bind(("",port))
-  server_sock.listen(1)
-
-  client_sock,address = server_sock.accept()
-  # print "Accepted connection from " + str(address)
-
-  result = client_sock.recv(1)
-  # print "received [%s]" % data
-
+  # Receive data
+  result = client.recv(1)
   end_time = time.time()
 
-  client_sock.close()
+  client.close()
   server_sock.close()
 
   return result[0], end_time - start_time
@@ -50,11 +41,19 @@ if __name__ == '__main__':
       for i in range(send_bytes):
         send.append(random.randint(0, 255))
 
+      # Bluetoothクライアントと接続
+      port = 1
+      size = 1024
+      s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+      s.bind((server_address,port))
+      s.listen(1)
+      client, clientInfo = s.accept()
+
       # send_bytes回の試行
       for i in range(send_bytes):
 
         # データの送信
-        result, execution_time = getdata([send[i]], speed_hz)
+        result, execution_time = getdata(client, [send[i]], speed_hz)
 
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
@@ -68,6 +67,15 @@ if __name__ == '__main__':
       proc.wait()
       print('[UART delay] Recorded : {0}\t{1}'.format(send_bytes, speed_hz))
 
+    client.close()
+    s.close()
     sys.exit(0)
   except KeyboardInterrupt:
+    client.close()
+    s.close()
+    sys.exit(0)
+  except bluetooth.BluetoothError:
+    print('Bluetooth connection is closed.')
+    client.close()
+    s.close()
     sys.exit(0)

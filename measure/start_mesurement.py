@@ -20,55 +20,63 @@ level_shift = ''
 
 
 def upload_receiver_src():
-  if device == 'Arduino_UNO':
-    if device == 'UART':
-      rts_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'ALT5'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-      rts_proc.wait()
+  attempt_time = 0
 
-      up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  while True:
+    attempt_time += 1
+
+    if device == 'Arduino_UNO':
+      if device == 'UART':
+        rts_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'ALT5'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        rts_proc.wait()
+
+        up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(up_proc.stdout.readline, b''):
+          print(line)
+        # 終わるまで待つ
+        status = up_proc.wait()
+
+        in_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'IN'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        in_proc.wait()
+
+      else:
+        up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(up_proc.stdout.readline, b''):
+          print(line)
+        # 終わるまで待つ
+        status = up_proc.wait()
+
+    elif device == 'ESP32-DevKitC':
+      if protocol == 'SPI':
+        if upload_receiver_src.uploaded_once == True:
+          return 0
+
+      # Makefileのあるところまで移動
+      os.chdir(receiver_src_folder_path)
+
+      up_proc = subprocess.Popen(['make', '-j4', 'flash'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       for line in iter(up_proc.stdout.readline, b''):
         print(line)
       # 終わるまで待つ
       status = up_proc.wait()
 
-      in_proc = subprocess.Popen(['gpio', '-g', 'mode', '17', 'IN'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-      in_proc.wait()
+
+      # 元の場所へ戻る
+      os.chdir(working_dir_path)
 
     else:
-      up_proc = subprocess.Popen(['platformio', 'run', '-e', device + '_' + protocol], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-      for line in iter(up_proc.stdout.readline, b''):
-        print(line)
-      # 終わるまで待つ
-      status = up_proc.wait()
+      pass
 
-  elif device == 'ESP32-DevKitC':
-    if protocol == 'SPI':
-      if upload_receiver_src.uploaded_once == True:
-        return 0
+    if status != 0:
+      print('[ERROR] Upload failed!')
+      if attempt_time < 3:
+        continue
+      else:
+        sys.exit(0)
 
-    # Makefileのあるところまで移動
-    os.chdir(receiver_src_folder_path)
-
-    up_proc = subprocess.Popen(['make', '-j4', 'flash'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    for line in iter(up_proc.stdout.readline, b''):
-      print(line)
-    # 終わるまで待つ
-    status = up_proc.wait()
-
+    print('Successfully uploaded!')
     upload_receiver_src.uploaded_once = True
-
-    # 元の場所へ戻る
-    os.chdir(working_dir_path)
-
-  else:
-    pass
-
-
-  if status != 0:
-    print('[ERROR] Upload failed!')
-    sys.exit(0)
-
-  print('Successfully uploaded!')
+    break
 
   return status
 upload_receiver_src.uploaded_once = False # This is for settings of ESP32-DevKitC(SPI)
