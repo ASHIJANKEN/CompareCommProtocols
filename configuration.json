@@ -23,6 +23,13 @@
         "Arduino_UNO": "Delay.ino",
         "ESP32-DevKitC": "delay.c"
       }
+    },
+    "Bluetooth": {
+      "speed_hz": "[10000]",
+      "script_name": "delay.py",
+      "receiver_src_name": {
+        "ESP32-DevKitC": "delay.c"
+      }
     }
   },
 

@@ -19,7 +19,33 @@ exp_type = ''
 level_shift = ''
 
 
-def upload_receiver_src():
+def create_receiver_src():
+  if protocol in ['SPI', 'Bluetooth', 'WiFi']:
+    return
+  else:
+    with open(receiver_src_path, mode='r') as fh:
+      code = fh.read()
+
+    if protocol == 'I2C':
+      split_pos = code.find('Wire.setClock(') + 14
+      code = code[:split_pos] + str(speed_hz) + code[split_pos:]
+    elif protocol == 'UART':
+      if device == 'Arduino_UNO':
+        split_pos = code.find('Serial.begin(') + 13
+      elif device == 'ESP32-DevKitC':
+        split_pos = code.find('.baud_rate = ') + 13
+      code = code[:split_pos] + str(speed_hz) + code[split_pos:]
+    receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
+
+    if device == 'Arduino_UNO':
+      with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
+        fh.write(code)
+    elif device == 'ESP32-DevKitC':
+      with open(receiver_src_folder_path + 'main/' + receiver_src_name, mode='w') as fh:
+        fh.write(code)
+
+
+def flash_receiver_src():
   attempt_time = 0
 
   while True:
@@ -48,7 +74,7 @@ def upload_receiver_src():
 
     elif device == 'ESP32-DevKitC':
       if protocol == 'SPI':
-        if upload_receiver_src.uploaded_once == True:
+        if flash_receiver_src.flashed_once == True:
           return 0
 
       # Makefileのあるところまで移動
@@ -68,18 +94,18 @@ def upload_receiver_src():
       pass
 
     if status != 0:
-      print('[ERROR] Upload failed!')
+      print('[ERROR] Flash failed!')
       if attempt_time < 3:
         continue
       else:
         sys.exit(0)
 
-    print('Successfully uploaded!')
-    upload_receiver_src.uploaded_once = True
+    print('Successfully flashed!')
+    flash_receiver_src.flashed_once = True
     break
 
   return status
-upload_receiver_src.uploaded_once = False # This is for settings of ESP32-DevKitC(SPI)
+flash_receiver_src.flashed_once = False # This is for settings of ESP32-DevKitC(SPI)
 
 
 if __name__ == '__main__':
@@ -115,7 +141,7 @@ if __name__ == '__main__':
     # どのデバイスの実験を行うか決定
     while True:
       print('Select protocol to measure.')
-      print('1: SPI 2: I2C 3: UART')
+      print('1: SPI 2: I2C 3: UART 4: Bluetooth 5: WiFi')
       cmd = input('> ')
       if cmd == 1:
         protocol = 'SPI'
@@ -125,6 +151,12 @@ if __name__ == '__main__':
         break
       elif cmd == 3:
         protocol = 'UART'
+        break
+      elif cmd == 4:
+        protocol = 'Bluetooth'
+        break
+      elif cmd == 5:
+        protocol = 'WiFi'
         break
       else:
         print('Oops! Wrong command.')
@@ -167,6 +199,11 @@ if __name__ == '__main__':
 
     # 何のレベルシフト方法を用いるか決定
     while True:
+      # 無線通信では関係ないのでNone
+      if protocol in ['Bluetooth', 'WiFi']:
+        level_shift = 'None'
+        break
+
       print('Select way of level shifting.')
       print('1: level_shift(2N7000)  2: level_shift(MM)  3: voltage_divider  4: None')
       cmd = input('> ')
@@ -219,34 +256,11 @@ if __name__ == '__main__':
 
       # Arduinoなどに書き込むソースコードを作成(SPI除く)
       print('Creating source code to write...')
-
-      if protocol == 'SPI':
-        pass
-      else:
-        with open(receiver_src_path, mode='r') as fh:
-          code = fh.read()
-
-        if protocol == 'I2C':
-          split_pos = code.find('Wire.setClock(') + 14
-          code = code[:split_pos] + str(speed_hz) + code[split_pos:]
-        elif protocol == 'UART':
-          if device == 'Arduino_UNO':
-            split_pos = code.find('Serial.begin(') + 13
-          elif device == 'ESP32-DevKitC':
-            split_pos = code.find('.baud_rate = ') + 13
-          code = code[:split_pos] + str(speed_hz) + code[split_pos:]
-        receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
-
-        if device == 'Arduino_UNO':
-          with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
-            fh.write(code)
-        elif device == 'ESP32-DevKitC':
-          with open(receiver_src_folder_path + 'main/' + receiver_src_name, mode='w') as fh:
-            fh.write(code)
+      create_receiver_src()
 
       # アップロード
-      print('Uploading...')
-      status = upload_receiver_src()
+      print('Flashing...')
+      status = flash_receiver_src()
       time.sleep(1)
 
       if status != 0:
