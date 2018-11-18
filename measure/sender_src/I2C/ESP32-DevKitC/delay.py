@@ -4,16 +4,32 @@ import smbus
 import subprocess
 import random
 import time
+import RPi.GPIO as GPIO
 
 SLAVE_ADDRESS = 0x40
+notice_pin = 4
+
+# GPIOのセットアップ
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(notice_pin, GPIO.IN)
 
 # I2Cバスにマスタとして接続
 bus = smbus.SMBus(1)
 
 
 def getdata(send_bytes):
+  # Wait slave to be ready
+  while GPIO.input(notice_pin) == GPIO.HIGH:
+    pass
+
   start_time = time.time()
+  # [cmd] 0:write 1:read
   bus.write_i2c_block_data(SLAVE_ADDRESS, 0, send_bytes)
+
+  # Wait slave to prepare response data
+  while GPIO.input(notice_pin) == GPIO.LOW:
+    pass
+
   result = bus.read_i2c_block_data(SLAVE_ADDRESS, 1, 1)
   end_time = time.time()
 

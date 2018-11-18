@@ -22,6 +22,8 @@ level_shift = ''
 def create_receiver_src():
   if protocol in ['SPI', 'Bluetooth', 'WiFi']:
     return
+  elif device == 'ESP32-DevKitC' and protocol == 'I2C':
+    return
   else:
     with open(receiver_src_path, mode='r') as fh:
       code = fh.read()
@@ -73,7 +75,7 @@ def flash_receiver_src():
         status = up_proc.wait()
 
     elif device == 'ESP32-DevKitC':
-      if protocol == 'SPI':
+      if protocol in ['SPI', 'I2C']:
         if flash_receiver_src.flashed_once == True:
           return 0
 

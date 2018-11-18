@@ -66,7 +66,7 @@ void app_main()
     gpio_set_level((gpio_num_t)SIGNAL, 0);
 
     while(1){
-        int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 1, 1000 / portTICK_RATE_MS);
+        int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 2, 1000 / portTICK_RATE_MS);
 
         // 受信処理
         if(ret == ESP_FAIL || ret == 0){
@@ -74,13 +74,15 @@ void app_main()
         }
 
         uint8_t cmd = rcv[0];
+        uint8_t data_length = rcv[1];
 
         if(cmd == 0){
             // Master wrote data to slave.
-            i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 1, 1000 / portTICK_RATE_MS);
+
+            int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, data_length, 1000 / portTICK_RATE_MS);
 
             // Prepare for master's reading event
-            i2c_slave_write_buffer(I2C_SLAVE_NUM, rcv, 1, 1000 / portTICK_RATE_MS);
+            i2c_slave_write_buffer(I2C_SLAVE_NUM, rcv + 1, 1, 1000 / portTICK_RATE_MS);
             gpio_set_level((gpio_num_t)SIGNAL, 1);
 
         }else if(cmd == 1){
