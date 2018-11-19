@@ -13,11 +13,11 @@
 #include "driver/spi_slave.h"
 #include "esp_spi_flash.h"
 
-#define GPIO_HANDSHAKE 2
-#define GPIO_MOSI 12
-#define GPIO_MISO 13
-#define GPIO_SCLK 15
-#define GPIO_CS 14
+#define GPIO_HANDSHAKE 16
+#define GPIO_MOSI 19
+#define GPIO_MISO 23
+#define GPIO_SCLK 5
+#define GPIO_CS 18
 
 //Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
 void my_post_setup_cb(spi_slave_transaction_t *trans) {
@@ -66,41 +66,43 @@ void app_main()
     gpio_set_pull_mode(GPIO_CS, GPIO_PULLUP_ONLY);
 
     // Initialize SPI slave interface
-    ret = spi_slave_initialize(HSPI_HOST, &buscfg, &slvcfg, 1);
+    ret = spi_slave_initialize(VSPI_HOST, &buscfg, &slvcfg, 1);
     assert(ret == ESP_OK);
 
-    char sendbuf[2] = "";
-    char recvbuf[2] = "";
+    char sendbuf[10] = "";
+    char recvbuf[10] = "";
     uint8_t rcv = 0;
-    memset(recvbuf, 0, 3);
+    memset(recvbuf, 0, 10);
     spi_slave_transaction_t t;
     memset(&t, 0, sizeof(t));
 
     while(1) {
         //Clear receive buffer, set send buffer to something sane
-        memset(recvbuf, 0xA5, 2);
-        memset(sendbuf, 0xA5, 2);
-        sendbuf[0] = rcv;
+        memset(recvbuf, 0xA5, 10);
+        memset(sendbuf, 0xB5, 10);
+        snprintf(sendbuf, sizeof(sendbuf), "dddeeefff");
+        // sendbuf[0] = rcv;
         // sprintf(sendbuf, "This is the receiver, sending data for transmission number %04d.", n);
 
         //Set up a transaction of 128 bytes to send/receive
-        t.length=2*8;
-        t.tx_buffer=sendbuf;
-        t.rx_buffer=recvbuf;
+        t.length = 10*8;
+        t.tx_buffer = sendbuf;
+        t.rx_buffer = recvbuf;
         /* This call enables the SPI slave interface to send/receive to the sendbuf and recvbuf. The transaction is
         initialized by the SPI master, however, so it will not actually happen until the master starts a hardware transaction
         by pulling CS low and pulsing the clock etc. In this specific example, we use the handshake line, pulled up by the
         .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
         data.
         */
-        ret=spi_slave_transmit(HSPI_HOST, &t, portMAX_DELAY);
+        ret = spi_slave_transmit(VSPI_HOST, &t, portMAX_DELAY);
 
         rcv = recvbuf[0];
 
         // spi_slave_transmit does not return until the master has done a transmission, so by here we have sent our data and
         // received data from the master. Print it.
         //
-        printf("Received: %u, %u, %u\n", recvbuf[0], recvbuf[1], recvbuf[2]);
+        printf("Received: %s\n", recvbuf);
+        // printf("Received: %u, %u, %u\n", recvbuf[0], recvbuf[1], recvbuf[2]);
 
     }
 }

@@ -6,7 +6,7 @@ import spidev
 import random
 import RPi.GPIO as GPIO
 
-handshake_pin = 2
+handshake_pin = 16
 
 # SPIのセットアップ
 CE = 0
@@ -19,19 +19,25 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(handshake_pin, GPIO.IN)
 
 def getdata(send_bytes):
-  # 受信用のダミーデータを加える
-  send_bytes.append(0)
+  # Wait for slave to be ready
+  while GPIO.input(handshake_pin) == 0:
+    pass
+
+  # 送信
+  start_send_time = time.time()
+  result = spi.xfer2(send_bytes)
+  end_send_time = time.time()
 
   # Wait for slave to be ready
   while GPIO.input(handshake_pin) == 0:
     pass
 
-  # 送受信・計測
-  start_time = time.time()
+  # 受信(ダミーデータを1byte送信)
+  start_rcv_time = time.time()
   result = spi.xfer2(send_bytes)
-  end_time = time.time()
+  end_rcv_time = time.time()
 
-  return result[1], end_time - start_time
+  return result[0], (end_send_time - start_send_time) + (end_rcv_time - start_send_time)
 
 if __name__ == '__main__':
   try:
