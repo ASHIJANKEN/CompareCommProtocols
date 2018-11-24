@@ -3,11 +3,9 @@
 #include "driver/i2c.h"
 #include "sdkconfig.h"
 
-static const char *TAG = "delay";
+static const char *TAG = "throughput";
 
 #define DATA_LENGTH 512                        /* !< Data buffer length of test buffer */
-#define RW_TEST_LENGTH 128                     /* !< Data length for r/w test, [0,DATA_LENGTH] */
-#define DELAY_TIME_BETWEEN_ITEMS_MS 1000       /* !< delay time between different test items */
 
 #define I2C_SLAVE_SCL_IO 26                    /* !< gpio number for i2c slave clock */
 #define I2C_SLAVE_SDA_IO 25                    /* !< gpio number for i2c slave data */
@@ -17,6 +15,26 @@ static const char *TAG = "delay";
 #define I2C_SLAVE_RX_BUF_LEN (2 * DATA_LENGTH) /* !< I2C slave rx buffer size */
 
 #define ESP_SLAVE_ADDR 0x40 /*!< ESP32 slave address, you can set any 7bit value */
+
+uint8_t err = 0;
+
+const int8_t rcv_vals[128] =
+  {241, 187, 147, 213, 106, 157, 70, 187,
+  188, 22, 78, 149, 200, 185, 21, 173,
+  125, 117, 105, 75, 77, 76, 201, 94,
+  119, 124, 228, 177, 61, 123, 132, 18,
+  186, 32, 145, 100, 20, 67, 101, 14,
+  69, 61, 122, 203, 145, 212, 235, 134,
+  144, 22, 192, 41, 131, 174, 140, 30,
+  146, 42, 113, 18, 169, 61, 196, 124,
+  249, 139, 197, 94, 192, 116, 3, 26,
+  216, 72, 77, 162, 145, 240, 196, 159,
+  163, 123, 170, 32, 60, 220, 1, 176,
+  127, 56, 208, 141, 98, 180, 96, 28,
+  44, 205, 85, 2, 94, 147, 215, 38,
+  13, 25, 160, 251, 70, 131, 24, 60,
+  17, 199, 15, 196, 66, 75, 244, 39,
+  177, 95, 164, 175, 44, 107, 193, 208};
 
 /**
  * @brief i2c slave initialization
@@ -66,7 +84,7 @@ void app_main()
     gpio_set_level((gpio_num_t)SIGNAL, 0);
 
     while(1){
-        int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 2, 1000 / portTICK_RATE_MS);
+        int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 1, 1000 / portTICK_RATE_MS);
 
         // 受信処理
         if(ret == ESP_FAIL || ret == 0){
@@ -74,21 +92,28 @@ void app_main()
         }
 
         uint8_t cmd = rcv[0];
-        uint8_t data_length = rcv[1];
 
+        gpio_set_level((gpio_num_t)SIGNAL, 1);
         if(cmd == 0){
             // Master wrote data to slave.
 
-            int ret = i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, data_length, 1000 / portTICK_RATE_MS);
+            // Get data length
+            i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, 1, 1000 / portTICK_RATE_MS);
+            int length = rcv[0];
 
-            // Prepare for master's reading event
-            i2c_slave_write_buffer(I2C_SLAVE_NUM, rcv + 1, 1, 1000 / portTICK_RATE_MS);
-            gpio_set_level((gpio_num_t)SIGNAL, 1);
+            // Read data
+            i2c_slave_read_buffer(I2C_SLAVE_NUM, rcv, length, 1000 / portTICK_RATE_MS);
+            for(int i = 0; i < length; i++){
+                err |= (rcv[i] ^ (uint8_t)rcv_vals[i&127]);
+            }
 
         }else if(cmd == 1){
             // Master read data from slave.
+            i2c_slave_write_buffer(I2C_SLAVE_NUM, &err, 1, 1000 / portTICK_RATE_MS);
 
-            gpio_set_level((gpio_num_t)SIGNAL, 0);
+            // reset params
+            err = 0;
         }
+        gpio_set_level((gpio_num_t)SIGNAL, 0);
     }
 }

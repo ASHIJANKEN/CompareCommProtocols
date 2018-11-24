@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
-
 import sys
 import smbus
 import subprocess
+import random
 import time
+import RPi.GPIO as GPIO
 
 SLAVE_ADDRESS = 0x40
-max_data_length = 31
+notice_pin = 4
+max_data_length = 30
+
+# GPIOのセットアップ
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(notice_pin, GPIO.IN)
 
 # I2Cバスにマスタとして接続
 bus = smbus.SMBus(1)
@@ -14,24 +20,45 @@ bus = smbus.SMBus(1)
 
 def getdata(send_bytes):
   # send_bytesをwrite_i2c_block_dataで送信できるサイズに分割する
-  send_blocks = [send_bytes[i: i + max_data_length] for i in range(0, len(send_bytes), max_data_length)]
+  send_blocks = [send_bytes[i: i + (max_data_length)] for i in range(0, len(send_bytes), max_data_length)]
+
+  # Wait slave to be ready
+  while GPIO.input(notice_pin) == GPIO.HIGH:
+    pass
 
   ###############################################
   # 送受信・計測
   ###############################################
   start_time = time.time()
-
   err = 0
-  for block in send_blocks:
-    # 送受信
-    bus.write_i2c_block_data(SLAVE_ADDRESS, 0, block)
-    result = bus.read_i2c_block_data(SLAVE_ADDRESS, 1, 1)
+  for i, block in enumerate(send_blocks):
+    # Add data length to the head of block
+    block.insert(0, len(block))
 
-    # 送受信誤りがあるかどうかを確認する
-    err |= result[0]
+    # Wait slave to be ready
+    while GPIO.input(notice_pin) == GPIO.HIGH:
+      pass
+
+    # Send data
+    # [cmd] 0:write 1:read
+    bus.write_i2c_block_data(SLAVE_ADDRESS, 0, block)
+
+    # Wait slave to prepare response data
+    while GPIO.input(notice_pin) == GPIO.HIGH:
+      pass
+
+    # Receive data(result of previous transaction)
+    result = bus.read_i2c_block_data(SLAVE_ADDRESS, 1, 1)
+    # Check error
+    if i != 0:
+      err |= result[0]
+
+  # Receive data(result of last transaction)
+  result = bus.read_i2c_block_data(SLAVE_ADDRESS, 1, 1)
+  # Check error
+  err |= result[0]
 
   end_time = time.time()
-
   err = 0 if err == 0 else 1
 
   return end_time - start_time, err
@@ -57,9 +84,10 @@ if __name__ == '__main__':
     send_bytes_pattern += elms[0:(max_data_length % l)]
 
     for send_bytes in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+
       # 記録ファイルの生成
       file_path = data_dir + str(speed_hz) + 'Hz' + '_' + str(send_bytes) + 'bytes.txt'
-      with open(file_path, mode='w', encoding='utf-8') as fh:
+      with open(file_path, mode = 'w', encoding='utf-8') as fh:
         pass
 
       # 送信データの作成
@@ -68,6 +96,7 @@ if __name__ == '__main__':
 
       # 1,000回の試行
       for i in range(1000):
+
         # データの送信
         execution_time, err = getdata(send)
 
