@@ -9,7 +9,7 @@
       }
     },
     "I2C": {
-      "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "delay.py",
       "receiver_src_name": {
         "Arduino_UNO": "Delay.ino",
@@ -39,15 +39,15 @@
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
-        "ESP32-DevKitC": "Throughput.ino"
+        "ESP32-DevKitC": "throughput.c"
       }
     },
     "I2C": {
-      "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
-        "ESP32-DevKitC": "Throughput.c"
+        "ESP32-DevKitC": "throughput.c"
       }
     },
     "UART": {

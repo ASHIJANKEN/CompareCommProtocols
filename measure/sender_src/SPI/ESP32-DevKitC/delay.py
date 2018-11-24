@@ -28,16 +28,7 @@ def getdata(send_bytes):
   result = spi.xfer2(send_bytes)
   end_send_time = time.time()
 
-  # Wait for slave to be ready
-  while GPIO.input(handshake_pin) == 0:
-    pass
-
-  # 受信(ダミーデータを1byte送信)
-  start_rcv_time = time.time()
-  result = spi.xfer2(send_bytes)
-  end_rcv_time = time.time()
-
-  return result[0], (end_send_time - start_send_time) + (end_rcv_time - start_send_time)
+  return result[0], (end_send_time - start_send_time)
 
 if __name__ == '__main__':
   try:

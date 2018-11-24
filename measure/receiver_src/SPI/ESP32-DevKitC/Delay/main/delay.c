@@ -69,8 +69,10 @@ void app_main()
     ret = spi_slave_initialize(VSPI_HOST, &buscfg, &slvcfg, 1);
     assert(ret == ESP_OK);
 
-    char sendbuf[10] = "";
-    char recvbuf[10] = "";
+    char *sendbuf = heap_caps_malloc(1025, MALLOC_CAP_DMA);
+    char *recvbuf = heap_caps_malloc(1025, MALLOC_CAP_DMA);
+    // char sendbuf[10] = "";
+    // char recvbuf[10] = "";
     uint8_t rcv = 0;
     memset(recvbuf, 0, 10);
     spi_slave_transaction_t t;
