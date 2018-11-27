@@ -20,7 +20,7 @@ level_shift = ''
 
 
 def create_receiver_src():
-  if protocol in ['SPI', 'Bluetooth', 'WiFi']:
+  if protocol in ['SPI', 'Bluetooth', 'TCP']:
     return
   elif device == 'ESP32-DevKitC' and protocol == 'I2C':
     return
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     # どのデバイスの実験を行うか決定
     while True:
       print('Select device to measure.')
-      print('1: Arduino_UNO 2: ESP32-DevKitC')
+      print('1:Arduino_UNO 2:ESP32-DevKitC')
       cmd = input('> ')
       if cmd == 1:
         device = 'Arduino_UNO'
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     # どのデバイスの実験を行うか決定
     while True:
       print('Select protocol to measure.')
-      print('1: SPI 2: I2C 3: UART 4: Bluetooth 5: WiFi')
+      print('1:SPI 2:I2C 3:UART 4:Bluetooth 5:TCP')
       cmd = input('> ')
       if cmd == 1:
         protocol = 'SPI'
@@ -158,7 +158,7 @@ if __name__ == '__main__':
         protocol = 'Bluetooth'
         break
       elif cmd == 5:
-        protocol = 'WiFi'
+        protocol = 'TCP'
         break
       else:
         print('Oops! Wrong command.')
@@ -202,12 +202,12 @@ if __name__ == '__main__':
     # 何のレベルシフト方法を用いるか決定
     while True:
       # 無線通信では関係ないのでNone
-      if protocol in ['Bluetooth', 'WiFi']:
+      if protocol in ['Bluetooth', 'TCP']:
         level_shift = 'None'
         break
 
       print('Select way of level shifting.')
-      print('1: level_shift(2N7000)  2: level_shift(MM)  3: voltage_divider  4: None')
+      print('1:level_shift(2N7000)  2:level_shift(MM)  3:voltage_divider  4:None')
       cmd = input('> ')
       if cmd == 1:
         level_shift = '2N7000'
