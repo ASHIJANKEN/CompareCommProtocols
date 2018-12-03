@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := delay
+PROJECT_NAME := throughput
 
 COMPONENT_ADD_INCLUDEDIRS := components/include
 

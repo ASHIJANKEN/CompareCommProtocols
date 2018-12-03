@@ -9,7 +9,7 @@ import random
 # このアドレスは各自書き換えてください。
 server_address = '30:AE:A4:CA:EA:1E'
 
-def getdata(socket, send_bytes, max_speed_hz):
+def getdata(socket, send_bytes):
   start_time = time.time()
   # Send data
   socket.send(bytes(bytearray(send_bytes)))
