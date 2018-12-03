@@ -4,46 +4,42 @@ import time
 import sys
 import serial
 import subprocess
-import RPi.GPIO as GPIO
+import random
 
-max_data_length = 63
-notice_pin = 18
+max_data_length = 64
 
-# GPIOのセットアップ
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(notice_pin, GPIO.OUT)
-
-def getdata(send_bytes, speed_hz):
-  # send_bytesをxfer2で送信できるサイズに分割する
+def getdata(send_bytes, max_speed_hz):
+  # send_bytesを送信できるサイズに分割する
   send_blocks = [send_bytes[i: i+max_data_length] for i in range(0, len(send_bytes), max_data_length)]
 
   ###############################################
   # 送受信・計測
   ###############################################
   result = []
-  with serial.Serial('/dev/ttyS0', speed_hz,timeout=100) as ser:
-    # 送信スタートの合図
-    GPIO.output(notice_pin, True)
+  with serial.Serial(
+    port='/dev/ttyUSB0',
+    baudrate=max_speed_hz,
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=100,
+  ) as ser:
     start_time = time.time()
     for i, block in enumerate(send_blocks):
-      #送信するbyte数を先頭に付加する(1byte)
-      l = len(block)
-      block.insert(0, (l & 0xFF))
+      # #送信するbyte数を先頭に付加する(1byte)
+      # l = len(block)
+      # block.insert(0, (l & 0xFF))
       ser.write(bytearray(block))
       # 送信リクエスト
       result.extend(ser.read(1))
     end_time = time.time()
 
-    # 送信終了の合図
-    GPIO.output(notice_pin, False)
-    ser.close()
-
-  # 送受信誤りがあるかどうかを確認する
-  err = 0
-  for i in result:
-    if i != 0:
-      err = 1
-      break
+    # 送受信誤りがあるかどうかを確認する
+    err = 0
+    for i in result:
+      if i != 0:
+        err = 1
+        break
 
   return end_time - start_time, err
 
@@ -55,7 +51,7 @@ if __name__ == '__main__':
 
     # 送信データをファイルから読み込む
     with open('send_bytes.txt', mode = 'r', encoding = 'utf-8') as fh:
-      send_bytes_pattern = fh.readlines()
+      elms = fh.readlines()
 
     # 末尾改行文字を除去
     elms = [i.rstrip() for i in elms]
@@ -97,3 +93,4 @@ if __name__ == '__main__':
     sys.exit(0)
   except KeyboardInterrupt:
     sys.exit(0)
+
