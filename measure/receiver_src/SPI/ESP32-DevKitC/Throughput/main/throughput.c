@@ -51,10 +51,7 @@ const uint8_t rcv_vals[128] =
   177, 95, 164, 175, 44, 107, 193, 208};
 
 
-// Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
-// It is also called when it enters spi_slave_transmit().
-// Reference says "Callback called after the SPI registers are loaded with new data,"
-// but I think it's wrong.
+//Called after a transaction is queued and ready for pickup by master. We use this to set the handshake line high.
 void my_post_setup_cb(spi_slave_transaction_t *trans) {
     WRITE_PERI_REG(GPIO_OUT_W1TS_REG, (1<<GPIO_HANDSHAKE));
 }
@@ -133,13 +130,12 @@ void app_main()
         uint8_t err = 0;
         for(int i = 0, j = 2; i < length; i++, j++){
             err |= (recvbuf[j] ^ rcv_vals[i&127]);
-            vTaskDelay(10 / portTICK_RATE_MS);
         }
 
         sendbuf[0] = err;
-        vTaskDelay(10 / portTICK_RATE_MS);
+//        vTaskDelay(10 / portTICK_RATE_MS);
         //spi_slave_transmit does not return until the master has done a transmission, so by here we have sent our data and
         //received data from the master. Print it.
-        // printf("Received: %u, %u, %u\n", recvbuf[0], recvbuf[1], recvbuf[2]);
+        ESP_LOGI(TAG, "Received: %u, %u, %u\n", recvbuf[0], recvbuf[1], recvbuf[2]);
     }
 }

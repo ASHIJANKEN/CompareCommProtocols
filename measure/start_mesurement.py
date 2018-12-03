@@ -110,6 +110,68 @@ def flash_receiver_src():
 flash_receiver_src.flashed_once = False # This is for settings of ESP32-DevKitC(SPI)
 
 
+def measure_proc_time():
+  if protocol == 'I2C' and device == 'Arduino_UNO':
+    console = subprocess.Popen(['platformio serialports monitor -p /dev/ttyACM0 -b 9600'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    time.sleep(5)
+    start_cmd_time = time.time()
+    proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
+
+    # コンソールから結果を記録
+    rcv_console = []
+    for line in iter(console.stdout.readline, b''):
+      if len(rcv_console) < 10002:
+        if time.time() - start_cmd_time > 85:
+          print('timeout!')
+          break
+        rcv_console.append(line)
+      else:
+        rcv_console.pop(0)
+        rcv_console.pop(0)
+        rcv_console = [i[:-2] for i in rcv_console]
+        rcv_console = [i + '\n' for i in rcv_console]
+        break
+    console.send_signal(signal.SIGINT)
+    console.terminate()
+    proc.terminate()
+
+  elif device == 'ESP32-DevKitC':
+    # Makefileのあるところまで移動
+    os.chdir(receiver_src_folder_path)
+
+    console = subprocess.Popen(['make monitor'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    time.sleep(5)
+    start_cmd_time = time.time()
+    proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
+
+    # コンソールから結果を記録
+    rcv_console = []
+    for line in iter(console.stdout.readline, b''):
+      if time.time() - start_cmd_time > 85:
+        print('timeout!')
+        break
+      if line.startswith(protocol):
+        elms = line.split()
+        rcv_console.append(elms[2] + '\n')
+        if elms[1] == '10000':
+          break
+
+    console.send_signal(signal.SIGINT)
+    console.terminate()
+    proc.terminate()
+
+    # 元の場所へ戻る
+    os.chdir(working_dir_path)
+
+  # ファイルに出力
+  file_path = data_dir_path + str(speed_hz) + 'Hz.txt'
+  with open(file_path, mode='a') as fh:
+    for line in rcv_console:
+      fh.write(line)
+
+  time.sleep(2)
+
+
 if __name__ == '__main__':
   try:
     # カレントディレクトリパスを取得
@@ -271,41 +333,11 @@ if __name__ == '__main__':
       time.sleep(1)
 
       # 実際の送受信スクリプトを実行
+      print('Executing script for the experiment...')
       if exp_type == 'proc_time':
-        print('Executing script for the experiment...')
-        console = subprocess.Popen(['platformio serialports monitor -p /dev/ttyACM0 -b 9600'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        time.sleep(5)
-        start_cmd_time = time.time()
-        proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
-
-        # コンソールから結果を記録
-        rcv_console = []
-        for line in iter(console.stdout.readline, b''):
-          if len(rcv_console) < 10002:
-            if time.time() - start_cmd_time > 85:
-              print('timeout!')
-              break
-            rcv_console.append(line)
-          else:
-            rcv_console.pop(0)
-            rcv_console.pop(0)
-            rcv_console = [i[:-2] for i in rcv_console]
-            rcv_console = [i + '\n' for i in rcv_console]
-            break
-        console.send_signal(signal.SIGINT)
-        console.terminate()
-        proc.terminate()
-
-        # ファイルに出力
-        file_path = data_dir_path + str(speed_hz) + 'Hz.txt'
-        with open(file_path, mode='a') as fh:
-          for line in rcv_console:
-            fh.write(line)
-
-        time.sleep(3)
+        measure_proc_time()
 
       else:
-        print('Executing script for the experiment...')
         proc = subprocess.Popen(['python3', script_path, data_dir_path, str(speed_hz)])
         proc.wait()
 

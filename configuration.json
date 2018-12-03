@@ -25,6 +25,7 @@
       }
     },
     "Bluetooth": {
+      "": "Set 10000 for convenience",
       "speed_hz": "[10000]",
       "script_name": "delay.py",
       "receiver_src_name": {
@@ -32,6 +33,7 @@
       }
     },
     "TCP": {
+      "": "Set 10000 for convenience",
       "speed_hz": "[10000]",
       "script_name": "delay.py",
       "receiver_src_name": {
@@ -62,7 +64,23 @@
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
-        "ESP32-DevKitC": "Throughput.ino"
+        "ESP32-DevKitC": "throughput.c"
+      }
+    },
+    "Bluetooth": {
+      "": "Set 10000 for convenience",
+      "speed_hz": "[10000]",
+      "script_name": "throughput.py",
+      "receiver_src_name": {
+        "ESP32-DevKitC": "throughput.c"
+      }
+    },
+    "TCP": {
+      "": "Set 10000 for convenience",
+      "speed_hz": "[10000]",
+      "script_name": "throughput.py",
+      "receiver_src_name": {
+        "ESP32-DevKitC": "throughput.c"
       }
     }
   },
