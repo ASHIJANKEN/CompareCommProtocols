@@ -86,12 +86,27 @@
   },
 
   "proc_time": {
+    "SPI": {
+      "speed_hz": "list(set(list(range(10000, 8000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "script_name": "proc_time.py",
+      "receiver_src_name": {
+        "ESP32-DevKitC": "proctime.c"
+      }
+    },
     "I2C": {
       "speed_hz": "list(set(list(range(10000, 500001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "proc_time.py",
       "receiver_src_name": {
         "Arduino_UNO": "ProcTime.ino",
-        "ESP32-DevKitC": "ProcTime.c"
+        "ESP32-DevKitC": "proctime.c"
+      },
+     "TCP": {
+      "": "Set 10000 for convenience",
+      "speed_hz": "[10000]",
+      "script_name": "proc_time.py",
+      "receiver_src_name": {
+        "Arduino_UNO": "ProcTime.ino",
+        "ESP32-DevKitC": "proctime.c"
       }
     }
   }

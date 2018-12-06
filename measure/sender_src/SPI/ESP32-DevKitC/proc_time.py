@@ -23,21 +23,19 @@ def getdata(send_bytes):
   while GPIO.input(handshake_pin) == 0:
     pass
 
-  start_send_time = time.time()
-
   # 送信
   spi.xfer2(send_bytes + [0, 0, 0, 0, 0, 0, 0, 0])
+  start_proc_time = time.time()
 
   # Wait for slave to be ready
   while GPIO.input(handshake_pin) == 0:
     pass
 
   # 受信
+  end_proc_time = time.time()
   result = spi.xfer2([0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-  end_send_time = time.time()
-
-  return result[0], (end_send_time - start_send_time)
+  return result[0], end_proc_time - start_proc_time
 
 if __name__ == '__main__':
   try:
@@ -61,19 +59,19 @@ if __name__ == '__main__':
       for i in range(send_bytes):
 
         # データの送信
-        result, execution_time = getdata([send[i]])
+        result, proc_time = getdata([send[i]])
 
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
 
-        print('[SPI delay] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, spi.max_speed_hz, execution_time, err))
+        print('[SPI proc_time] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, spi.max_speed_hz, execution_time, err))
         with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
           fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
 
       # ログを消す
       proc = subprocess.Popen(['clear'])
       proc.wait()
-      print('[SPI delay] Recorded : {0}\t{1}'.format(send_bytes, spi.max_speed_hz))
+      print('[SPI proc_time] Recorded : {0}\t{1}'.format(send_bytes, spi.max_speed_hz))
 
     spi.close()
     sys.exit(0)
