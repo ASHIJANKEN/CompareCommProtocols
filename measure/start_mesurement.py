@@ -121,7 +121,7 @@ def measure_proc_time():
     rcv_console = []
     for line in iter(console.stdout.readline, b''):
       if len(rcv_console) < 10002:
-        if time.time() - start_cmd_time > 85:
+        if time.time() - start_cmd_time > 300:
           print('timeout!')
           break
         rcv_console.append(line)
@@ -136,35 +136,41 @@ def measure_proc_time():
     proc.terminate()
 
   elif device == 'ESP32-DevKitC':
-    # Makefileのあるところまで移動
-    os.chdir(receiver_src_folder_path)
+    if protocol == 'TCP':
+      # Makefileのあるところまで移動
+      os.chdir(receiver_src_folder_path)
 
-    console = subprocess.Popen(['make monitor'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    time.sleep(5)
-    start_cmd_time = time.time()
-    proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
+      console = subprocess.Popen(['make monitor'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      time.sleep(10)
+      start_cmd_time = time.time()
+      proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
 
-    # コンソールから結果を記録
-    rcv_console = []
-    for line in iter(console.stdout.readline, b''):
-      if time.time() - start_cmd_time > 85:
-        print('timeout!')
-        break
-      if line.startswith(protocol):
-        elms = line.split()
-        rcv_console.append(elms[2] + '\n')
-        if elms[1] == '10000':
+      # コンソールから結果を記録
+      rcv_console = []
+      for line in iter(console.stdout.readline, b''):
+        if time.time() - start_cmd_time > 85:
+          print('timeout!')
           break
+        if line.startswith(protocol):
+          elms = line.split()
+          rcv_console.append(elms[2] + '\n')
+          if elms[1] == '10000':
+            break
 
-    console.send_signal(signal.SIGINT)
-    console.terminate()
-    proc.terminate()
+      console.send_signal(signal.SIGINT)
+      console.terminate()
+      proc.terminate()
 
-    # 元の場所へ戻る
-    os.chdir(working_dir_path)
+      # 元の場所へ戻る
+      os.chdir(working_dir_path)
+
+    else:
+      proc = subprocess.Popen(['python3', script_path, data_dir_path, str(speed_hz)])
+      proc.wait()
+      return
 
   # ファイルに出力
-  file_path = data_dir_path + str(speed_hz) + 'Hz.txt'
+  file_path = data_dir_path + str(speed_hz) + 'Hz_10000bytes.txt'
   with open(file_path, mode='a') as fh:
     for line in rcv_console:
       fh.write(line)
@@ -227,7 +233,7 @@ if __name__ == '__main__':
         print('\n')
 
     # 何の実験を行うか決定
-    if protocol == 'I2C':
+    if protocol in ['SPI', 'I2C', 'TCP']:
       # I2Cの時はproc_timeを測れる
       while True:
         print('Select what you want to measure.')
@@ -304,7 +310,8 @@ if __name__ == '__main__':
 
     # デバイスに書き込むソースコードのパスを取得
     receiver_src_name = config[exp_type][protocol]['receiver_src_name'][device]
-    receiver_src_folder_path = receiver_src_path + '/' + protocol + '/' + device + '/' + exp_type[0].upper() + exp_type[1:] + '/'
+    dirname_protocol = (exp_type[0].upper() + exp_type[1:]) if exp_type != 'proc_time' else 'ProcTime'
+    receiver_src_folder_path = receiver_src_path + '/' + protocol + '/' + device + '/' + dirname_protocol + '/'
     receiver_src_path = receiver_src_folder_path + receiver_src_name
 
     #####################################################
