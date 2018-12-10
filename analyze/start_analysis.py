@@ -8,11 +8,11 @@
 import re
 import matplotlib.pyplot as plt
 import os
+import subprocess
 
-
-
-
-
+def clear_log():
+  proc = subprocess.Popen(['clear'])
+  proc.wait()
 
 
 if __name__ == '__main__':
@@ -40,17 +40,23 @@ if __name__ == '__main__':
   proc = subprocess.Popen(['python3', 'analyze_proc_time.py', device, protocol, level_shift])
   proc.wait()
 
+  clear_log()
+
   # delayのデータを整理、グラフを出力
-  print('==================== [ Analyzing proc_time ] ====================')
+  print('==================== [ Analyzing delay/fluctuation ] ====================')
   proc = subprocess.Popen(['python3', 'analyze_delay_fluctuation.py', device, protocol, level_shift])
   proc.wait()
+
+  clear_log()
 
   # throughputのデータを整理、グラフを出力
   print('==================== [ Analyzing throughput ] ====================')
   proc = subprocess.Popen(['python3', 'analyze_throughput.py', device, protocol, level_shift])
   proc.wait()
 
+  clear_log()
+
   # delayを比較、グラフに出力
   print('==================== [ Comparing delay ] ====================')
-  proc = subprocess.Popen(['python3', 'analyze_delay_fluctuation.py', device, protocol, level_shift])
+  proc = subprocess.Popen(['python3', 'compare_delay_fluctuation.py', device, protocol, level_shift])
   proc.wait()

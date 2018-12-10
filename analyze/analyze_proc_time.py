@@ -28,6 +28,9 @@ if __name__ == '__main__':
     # ファイルに項目名を追加
     fh.write('speed_hz[hz]\tsend_bytes[byte]\taverage_proctime[us]\t median_proctime[us]\tmode_proctime[us]\tmax_proctime[us]\tmin_proctime[us]\n')
 
+  # speed_hzの情報を取り出す
+  with open(os.path.abspath('../configuration.json'), mode='r') as f:
+    config = json.load(f)
   speed_hz_arr = eval(config['proc_time'][protocol]['speed_hz'])
   speed_hz_arr.sort()
   for speed_hz in speed_hz_arr:

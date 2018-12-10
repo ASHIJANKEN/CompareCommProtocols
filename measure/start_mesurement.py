@@ -296,7 +296,7 @@ if __name__ == '__main__':
     script_path = 'sender_src/' + protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
-    data_dir_path = '../measured_data/' + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
+    data_dir_path = '../measured_data/' + protocol + '/' + device + '/' + exp_type + '/' + level_shift + '/'
     try:
       os.makedirs(data_dir_path)
     except OSError as e:
@@ -305,8 +305,8 @@ if __name__ == '__main__':
 
     # デバイスに書き込むソースコードのパスを取得
     receiver_src_name = config[exp_type][protocol]['receiver_src_name'][device]
-    dirname_protocol = (exp_type[0].upper() + exp_type[1:]) if exp_type != 'proc_time' else 'ProcTime'
-    receiver_src_folder_path = 'receiver_src/' + protocol + '/' + device + '/' + dirname_protocol + '/'
+    dirname_exp_type = (exp_type[0].upper() + exp_type[1:]) if exp_type != 'proc_time' else 'ProcTime'
+    receiver_src_folder_path = 'receiver_src/' + protocol + '/' + device + '/' + dirname_exp_type + '/'
     receiver_src_path = receiver_src_folder_path + receiver_src_name
 
     #####################################################

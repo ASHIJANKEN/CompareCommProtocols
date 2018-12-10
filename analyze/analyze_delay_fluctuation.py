@@ -30,7 +30,10 @@ if __name__ == '__main__':
     # ファイルに項目名を追加
     fh.write('speed_hz[hz]\tsend_bytes[byte]\taverage_2Delay[ms]\tmedian_2Delay[ms]\tmode_2Delay[ms]\tmax_2Delay[ms]\tmin_2Delay[ms]\tfluctuation[ms]\terror_rate\tvariance[ms^2]\tstandard deviation[ms]\n')
 
-  speed_hz_arr = eval(config['proc_time'][protocol]['speed_hz'])
+  # speed_hzの情報を取り出す
+  with open(os.path.abspath('../configuration.json'), mode='r') as f:
+    config = json.load(f)
+  speed_hz_arr = eval(config['delay'][protocol]['speed_hz'])
   speed_hz_arr.sort()
 
   for speed_hz in speed_hz_arr:
@@ -65,30 +68,30 @@ if __name__ == '__main__':
           continue
 
     # ディレイの配列とエラーの配列を得る
-    throuput_arr = []
+    delay_arr = []
     err_arr = []
     for record in records:
       elms = re.split(':|\t', record)
-      if protocol =='i2c':
-        throuput_arr.append((float(elms[1]) - proc_time) * 1000)
+      if protocol =='i2c' or (device == 'ESP32-DevKitC' and protocol in ['SPI', 'TCP']):
+        delay_arr.append((float(elms[1]) - proc_time) * 1000)
       else:
-        throuput_arr.append(float(elms[1]) * 1000)
+        delay_arr.append(float(elms[1]) * 1000)
       err_arr.append(int(elms[2]))
 
     # いろんな値を計算する
-    avr_delay = np.mean(throuput_arr)
-    median_delay = np.median(throuput_arr)
+    avr_delay = np.mean(delay_arr)
+    median_delay = np.median(delay_arr)
     try:
-      mode_delay = mode(throuput_arr)
+      mode_delay = mode(delay_arr)
     except StatisticsError:
       mode_delay = -1
       print('---------- StatisticsError occured! ----------')
-    max_delay = max(throuput_arr)
-    min_delay = min(throuput_arr)
+    max_delay = max(delay_arr)
+    min_delay = min(delay_arr)
     error_rate = np.mean(err_arr)
-    fluctuation = max(throuput_arr) - avr_delay
-    variance = np.var(throuput_arr)
-    std = np.std(throuput_arr)
+    fluctuation = max(delay_arr) - avr_delay
+    variance = np.var(delay_arr)
+    std = np.std(delay_arr)
 
     # ファイルに記録
     with open(record_file_path, mode = 'a', encoding = 'utf-8') as fh:
@@ -101,7 +104,7 @@ if __name__ == '__main__':
     ax = fig2.add_subplot(1,1,1)
     ax.grid(which='major',color='gray',linestyle='--')
     ax.grid(which='minor',color='gray',linestyle='dotted')
-    ax.hist(throuput_arr, bins=100, ec='black')
+    ax.hist(delay_arr, bins=100, ec='black')
     ax.set_xlim(xmin = 0)
     # x軸の範囲を固定したいなら以下のコメントを外す
     # ax.set_xlim(xmax =  9)
