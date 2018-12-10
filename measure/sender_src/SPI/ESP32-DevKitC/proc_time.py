@@ -64,9 +64,9 @@ if __name__ == '__main__':
         # 受信データのエラーチェック
         err = 0 if result == send[i] else 1
 
-        print('[SPI proc_time] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, spi.max_speed_hz, execution_time, err))
+        print('[SPI proc_time] {0}:{1}\t{2}\t{3}\t{4}'.format(i, send_bytes, spi.max_speed_hz, proc_time, err))
         with open(file_path, mode = 'a', encoding = 'utf-8') as fh:
-          fh.write('{0}:{1}\t{2}\n'.format(i, execution_time, err))
+          fh.write('{0}:{1}\t{2}\n'.format(i, proc_time, err))
 
       # ログを消す
       proc = subprocess.Popen(['clear'])

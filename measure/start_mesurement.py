@@ -40,7 +40,7 @@ def create_receiver_src():
     receiver_src_extension = re.findall(r'\.[^\.]+$', receiver_src_name)[-1]
 
     if device == 'Arduino_UNO':
-      with open(platformio_src_path + '/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
+      with open('src/' + 'receiver_src' + receiver_src_extension, mode='w') as fh:
         fh.write(code)
     elif device == 'ESP32-DevKitC':
       with open(receiver_src_folder_path + 'main/' + receiver_src_name, mode='w') as fh:
@@ -188,11 +188,6 @@ if __name__ == '__main__':
     with open(os.path.abspath('path_config.json'), mode='r') as f:
       path_config = json.load(f)
 
-    data_dir_path_base = os.path.abspath(path_config['measured_data_path'])
-    sender_src_path = os.path.abspath(path_config['sender_src_path'])
-    receiver_src_path = os.path.abspath(path_config['receiver_src_path'])
-    platformio_src_path = os.path.abspath(path_config['PlatformIO_src_path'])
-
     # どのデバイスの実験を行うか決定
     while True:
       print('Select device to measure.')
@@ -298,10 +293,10 @@ if __name__ == '__main__':
     speed_hz_list.sort()
 
     # 実験スクリプトのパスを取得
-    script_path = sender_src_path + '/' + protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
+    script_path = 'sender_src/' + protocol + '/' + device + '/' + config[exp_type][protocol]['script_name']
 
     # データ記録用フォルダを生成
-    data_dir_path = data_dir_path_base + '/' + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
+    data_dir_path = '../measured_data/' + device + '/' + protocol + '/' + level_shift + '/' + exp_type + '/'
     try:
       os.makedirs(data_dir_path)
     except OSError as e:
@@ -311,7 +306,7 @@ if __name__ == '__main__':
     # デバイスに書き込むソースコードのパスを取得
     receiver_src_name = config[exp_type][protocol]['receiver_src_name'][device]
     dirname_protocol = (exp_type[0].upper() + exp_type[1:]) if exp_type != 'proc_time' else 'ProcTime'
-    receiver_src_folder_path = receiver_src_path + '/' + protocol + '/' + device + '/' + dirname_protocol + '/'
+    receiver_src_folder_path = 'receiver_src/' + protocol + '/' + device + '/' + dirname_protocol + '/'
     receiver_src_path = receiver_src_folder_path + receiver_src_name
 
     #####################################################
