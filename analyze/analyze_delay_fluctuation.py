@@ -113,8 +113,8 @@ if __name__ == '__main__':
     ax.set_xlabel('2Delay[ms]')
     ax.set_ylabel('Freq')
 
-    pdf_folder_path = record_dir_path + '/pdf'
-    png_folder_path = record_dir_path + '/png'
+    pdf_folder_path = record_dir_path + 'pdf'
+    png_folder_path = record_dir_path + 'png'
     os.mkdir(png_folder_path, exist_ok = True)
     os.mkdir(pdf_folder_path, exist_ok = True)
 

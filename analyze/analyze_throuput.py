@@ -154,13 +154,13 @@ if __name__ == '__main__':
   error_graph.set_ylim(ymin = 0, ymax = 100)
   error_graph.set_xlim(xmin=0)
 
-  pdf_folder_path = record_dir_path + '/pdf'
-  png_folder_path = record_dir_path + '/png'
+  pdf_folder_path = record_dir_path + 'pdf'
+  png_folder_path = record_dir_path + 'png'
   os.mkdir(png_folder_path, exist_ok = True)
   os.mkdir(pdf_folder_path, exist_ok = True)
 
-  fig1.savefig(pdf_folder_path + '/compare_error_rate.pdf')
-  fig1.savefig(png_folder_path + '/compare_error_rate.png')
-  fig2.savefig(pdf_folder_path + '/compare_throuput.pdf')
-  fig2.savefig(png_folder_path + '/compare_throuput.png')
+  fig1.savefig(pdf_folder_path + '/analyze_error_rate.pdf')
+  fig1.savefig(png_folder_path + '/analyze_error_rate.png')
+  fig2.savefig(pdf_folder_path + '/analyze_throuput.pdf')
+  fig2.savefig(png_folder_path + '/analyze_throuput.png')
   plt.close()

@@ -185,8 +185,6 @@ if __name__ == '__main__':
 
     with open(os.path.abspath('../configuration.json'), mode='r') as f:
       config = json.load(f)
-    with open(os.path.abspath('path_config.json'), mode='r') as f:
-      path_config = json.load(f)
 
     # どのデバイスの実験を行うか決定
     while True:

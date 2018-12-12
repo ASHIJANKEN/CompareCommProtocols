@@ -87,8 +87,8 @@ if __name__ == '__main__':
     # x軸の範囲を固定したいなら以下のコメントを外す
     # ax.set_xlim(xmax =  9)
 
-    pdf_folder_path = record_dir_path + '/pdf'
-    png_folder_path = record_dir_path + '/png'
+    pdf_folder_path = record_dir_path + 'pdf'
+    png_folder_path = record_dir_path + 'png'
     os.mkdir(png_folder_path, exist_ok = True)
     os.mkdir(pdf_folder_path, exist_ok = True)
 
