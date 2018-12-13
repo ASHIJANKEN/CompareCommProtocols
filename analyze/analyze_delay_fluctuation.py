@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 from statistics import mode, StatisticsError
 import os
 import sys
+import json
+
 
 if __name__ == '__main__':
 
@@ -22,11 +24,11 @@ if __name__ == '__main__':
   level_shift = argvs[3]
 
   # 記録ファイルの生成
-  record_dir_path = '../analyzed_data/' + protocol + '/' + device + '/Delay/' + level_shift + '/'
-  os.mkdirs(record_dir_path, exist_ok = True)
+  record_dir_path = '../analyzed_data/' + protocol + '/' + device + '/delay/' + level_shift + '/'
+  os.makedirs(record_dir_path, exist_ok = True)
 
   record_file_path = record_dir_path + 'delay.txt'
-  with open(record_file_path, mode = 'w', encoding = 'utf-8') as fh:
+  with open(os.path.abspath(record_file_path), mode = 'w', encoding = 'utf-8') as fh:
     # ファイルに項目名を追加
     fh.write('speed_hz[hz]\tsend_bytes[byte]\taverage_2Delay[ms]\tmedian_2Delay[ms]\tmode_2Delay[ms]\tmax_2Delay[ms]\tmin_2Delay[ms]\tfluctuation[ms]\terror_rate\tvariance[ms^2]\tstandard deviation[ms]\n')
 
@@ -40,19 +42,19 @@ if __name__ == '__main__':
     send_bytes = 10000
     # データファイルのレコードを配列として読み取る
     try:
-      fetch_data_dir = '../measured_data/' + protocol + '/' + device + '/Delay/' + level_shift + '/'
+      fetch_data_dir = '../measured_data/' + protocol + '/' + device + '/delay/' + level_shift + '/'
       delay_file = str(speed_hz) + 'Hz_' + str(send_bytes) + 'bytes.txt'
       delay_file_path = fetch_data_dir + delay_file
-      with open(delay_file_path, mode = 'r', encoding = 'utf-8') as fh:
+      with open(os.path.abspath(delay_file_path), mode = 'r', encoding = 'utf-8') as fh:
         records = fh.readlines()
     except IOError:
       print(delay_file_path + ' cannot be opened.')
       continue
 
     # delayからproc_timeを引かなければならない場合、そのデータも取得
-    if protocol == 'i2c' or (device == 'ESP32-DevKitC' and protocol in ['SPI', 'TCP']):
-      p_file_path = '../analyzed_data/' + protocol + '/' + device + '/ProcTime/' + level_shift + '/proc_time.txt'
-      with open(p_file_path, mode = 'r', encoding = 'utf-8') as fh:
+    if protocol == 'I2C' or (device == 'ESP32-DevKitC' and protocol in ['SPI', 'TCP']):
+      p_file_path = '../analyzed_data/' + protocol + '/' + device + '/proc_time/' + level_shift + '/proc_time.txt'
+      with open(os.path.abspath(p_file_path), mode = 'r', encoding = 'utf-8') as fh:
         P_records = fh.readlines()
         # ヘッダーの除去
         P_records.pop(0)
@@ -64,7 +66,7 @@ if __name__ == '__main__':
             found = True
             break
         if found == False:
-          print('There is no data for {}[Hz]'.format(speed_hz))
+          print('There is no data for {}:{}[Hz]'.format(protocol, speed_hz))
           continue
 
     # ディレイの配列とエラーの配列を得る
@@ -94,7 +96,7 @@ if __name__ == '__main__':
     std = np.std(delay_arr)
 
     # ファイルに記録
-    with open(record_file_path, mode = 'a', encoding = 'utf-8') as fh:
+    with open(os.path.abspath(record_file_path), mode = 'a', encoding = 'utf-8') as fh:
       fh.write('{0}\t{1}\t{2}\t {3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\n'.format(speed_hz, send_bytes, avr_delay, median_delay, mode_delay, max_delay, min_delay, fluctuation, error_rate, variance, std))
     print('{0} : Recorded {1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}'.format(record_file_path, speed_hz, send_bytes, avr_delay, median_delay, mode_delay, max_delay, min_delay, fluctuation, error_rate, variance, std))
 
@@ -108,15 +110,15 @@ if __name__ == '__main__':
     ax.set_xlim(xmin = 0)
     # x軸の範囲を固定したいなら以下のコメントを外す
     # ax.set_xlim(xmax =  9)
-    plt.title(protocol.upper() + ' ' + str(speed_hz) + 'Hz')
+    plt.title(protocol+ ' ' + str(speed_hz) + 'Hz')
     plt.yscale('log')
     ax.set_xlabel('2Delay[ms]')
     ax.set_ylabel('Freq')
 
     pdf_folder_path = record_dir_path + 'pdf'
     png_folder_path = record_dir_path + 'png'
-    os.mkdir(png_folder_path, exist_ok = True)
-    os.mkdir(pdf_folder_path, exist_ok = True)
+    os.makedirs(png_folder_path, exist_ok = True)
+    os.makedirs(pdf_folder_path, exist_ok = True)
 
     plt.savefig(pdf_folder_path + '/' + str(speed_hz) + 'Hz.pdf')
     plt.savefig(png_folder_path + '/' + str(speed_hz) + 'Hz.png')

@@ -49,8 +49,6 @@ if __name__ == '__main__':
       # ESP32との接続を切断
       sock.close()
 
-      proc.wait()
-
     sock.close()
     sys.exit(0)
   except KeyboardInterrupt:

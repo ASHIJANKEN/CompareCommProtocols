@@ -111,8 +111,8 @@ for shift_way in ['FET']:
     pdf_path = base_dir + analyzed_data_dir + compare_dir + 'pdf'
     png_path = base_dir + analyzed_data_dir + compare_dir + 'png'
     try:
-      os.mkdir(pdf_path)
-      os.mkdir(png_path)
+      os.makedirs(pdf_path)
+      os.makedirs(png_path)
     except FileExistsError:
       pass
     png_name = str(speed_hz) + 'Hz(stack_graph).pdf'
@@ -162,8 +162,8 @@ for shift_way in ['FET']:
     pdf_path = base_dir + analyzed_data_dir + compare_dir + 'pdf'
     png_path = base_dir + analyzed_data_dir + compare_dir + 'png'
     try:
-      os.mkdir(pdf_path)
-      os.mkdir(png_path)
+      os.makedirs(pdf_path)
+      os.makedirs(png_path)
     except FileExistsError:
       pass
     png_name = str(speed_hz) + 'Hz(stack_graph).pdf'

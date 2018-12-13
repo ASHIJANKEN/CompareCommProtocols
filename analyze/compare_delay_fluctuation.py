@@ -10,6 +10,7 @@ import re
 import matplotlib.pyplot as plt
 import os
 import sys
+import json
 
 
 if __name__ == '__main__':
@@ -53,24 +54,25 @@ if __name__ == '__main__':
 
   # 2delayのデータを取得
   try:
-    analyzed_delay_dir = '../analyzed_data/' + protocol + '/' + device + '/Delay/' + level_shift + '/'
+    analyzed_delay_dir = '../analyzed_data/' + protocol + '/' + device + '/delay/' + level_shift + '/'
     delay_file_path = analyzed_delay_dir + 'delay.txt'
-    with open(delay_file_path, mode = 'r', encoding = 'utf-8') as fh:
+    with open(os.path.abspath(delay_file_path), mode = 'r', encoding = 'utf-8') as fh:
       all_records = fh.readlines()
       all_records.pop(0)
       records = {}
       for record in all_records:
         elms = re.split(':|\t', record)
-        if send_bytes == int(elms[1]):
-          records[speed_hz] = elms
+
+        if int(elms[1]) == 10000:
+          records[int(elms[0])] = elms
   except IOError:
     print(delay_file_path + ' cannot be opened.')
-    continue
+    sys.exit(1)
 
   for speed_hz in speed_hz_arr:
     # 2Dと誤り率を得る
     elms = records.get(speed_hz)
-    if elms == None
+    if elms == None:
       continue
 
     # グラフ描画用に値を保存
@@ -82,11 +84,11 @@ if __name__ == '__main__':
     rec_spdhz_array.append(speed_hz/1000)
 
   # グラフを描画
-#         error_graph.plot(rec_spdhz_array, error_rate_array, '-D', markersize=4, linewidth = 2, label=comm_way.upper())
+#         error_graph.plot(rec_spdhz_array, error_rate_array, '-D', markersize=4, linewidth = 2, label=protocol)
 #         delay_graph.plot(rec_spdhz_array, delay_med_array, '-D', markersize=4, linewidth = 2, label='Median value[ms]')
 #         delay_graph.plot(rec_spdhz_array, delay_max_array, '-D', markersize=4, linewidth = 2, label='Maximum value[ms]')
 #         delay_graph.plot(rec_spdhz_array, delay_min_array, '-D', markersize=4, linewidth = 2, label='Minimum value[ms]')
-  error_graph.plot(rec_spdhz_array, error_rate_array, linewidth = 2, label=comm_way.upper())
+  error_graph.plot(rec_spdhz_array, error_rate_array, linewidth = 2, label=protocol)
   delay_graph.plot(rec_spdhz_array, delay_avr_array, linewidth = 2, label='Avarage value[ms]')
   delay_graph.plot(rec_spdhz_array, delay_med_array, linewidth = 2, label='Median value[ms]')
   delay_graph.plot(rec_spdhz_array, delay_max_array, linewidth = 2, label='Maximum value[ms]')
@@ -99,13 +101,13 @@ if __name__ == '__main__':
   error_graph.set_xlim(xmin=0)
   delay_graph.set_ylim(ymin = 0)
   delay_graph.set_xlim(xmin=0)
-  delay_graph.set_title('2Delay (' + comm_way.upper() + ')')
-  error_graph.set_title('Error Rate (' + comm_way.upper() + ')')
+  delay_graph.set_title('2Delay (' + protocol + ')')
+  error_graph.set_title('Error Rate (' + protocol + ')')
 
   pdf_folder_path = analyzed_delay_dir + '/pdf'
   png_folder_path = analyzed_delay_dir + '/png'
-  os.mkdir(png_folder_path, exist_ok = True)
-  os.mkdir(pdf_folder_path, exist_ok = True)
+  os.makedirs(png_folder_path, exist_ok = True)
+  os.makedirs(pdf_folder_path, exist_ok = True)
 
   fig1.savefig(pdf_folder_path + '/compare_error_rate.pdf')
   fig1.savefig(png_folder_path + '/compare_error_rate.png')

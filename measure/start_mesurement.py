@@ -137,32 +137,33 @@ def measure_proc_time():
 
   elif device == 'ESP32-DevKitC':
     if protocol == 'TCP':
+
       # Makefileのあるところまで移動
       os.chdir(receiver_src_folder_path)
-
       console = subprocess.Popen(['make monitor'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       time.sleep(10)
+
+      # 元の場所へ戻る
+      os.chdir(working_dir_path)
+      proc = subprocess.Popen(['python3', "" + script_path, str(speed_hz)])
       start_cmd_time = time.time()
-      proc = subprocess.Popen(['python3', script_path, str(speed_hz)])
 
       # コンソールから結果を記録
       rcv_console = []
       for line in iter(console.stdout.readline, b''):
-        if time.time() - start_cmd_time > 85:
+        print(line)
+        if time.time() - start_cmd_time > 2000:
           print('timeout!')
           break
         if line.startswith(protocol):
           elms = line.split()
-          rcv_console.append(elms[2] + '\n')
+          rcv_console.append('{0}:{1}\n'.format(int(elms[1]) - 1, float(elms[2])/1000000))
           if elms[1] == '10000':
             break
 
       console.send_signal(signal.SIGINT)
       console.terminate()
       proc.terminate()
-
-      # 元の場所へ戻る
-      os.chdir(working_dir_path)
 
     else:
       proc = subprocess.Popen(['python3', script_path, data_dir_path, str(speed_hz)])
@@ -171,7 +172,7 @@ def measure_proc_time():
 
   # ファイルに出力
   file_path = data_dir_path + str(speed_hz) + 'Hz_10000bytes.txt'
-  with open(file_path, mode='a') as fh:
+  with open(file_path, mode='w') as fh:
     for line in rcv_console:
       fh.write(line)
 
@@ -185,7 +186,6 @@ if __name__ == '__main__':
 
     with open(os.path.abspath('../configuration.json'), mode='r') as f:
       config = json.load(f)
-
     # どのデバイスの実験を行うか決定
     while True:
       print('Select device to measure.')
