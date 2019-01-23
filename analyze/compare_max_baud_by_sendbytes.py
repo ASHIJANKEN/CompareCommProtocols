@@ -25,7 +25,7 @@ for ack_way in ['block_ack']:
     #   plt.yscale('log')
       width = 0.2
       maxbaud_graph.set_xlabel('Send Data[Byte]')
-      maxbaud_graph.set_ylabel('Baudrate[kbaud(kHz)]')
+      maxbaud_graph.set_ylabel('Baudrate[kbaud]')
 
       send_bytes_arr = [2, 4 ,8, 16, 32, 64, 128, 256, 512, 1024]
       max_baud_array = [0] * len(send_bytes_arr)

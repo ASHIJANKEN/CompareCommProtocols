@@ -32,11 +32,11 @@ if __name__ == '__main__':
   delay_graph = fig2.add_subplot(1,1,1)
   error_graph.grid(which='major',color='gray',linestyle='--')
   error_graph.grid(which='minor',color='gray',linestyle='dotted')
-  error_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+  error_graph.set_xlabel('Baudrate[kbaud]')
   error_graph.set_ylabel('Error Rate[%]')
   delay_graph.grid(which='major',color='gray',linestyle='--')
   delay_graph.grid(which='minor',color='gray',linestyle='dotted')
-  delay_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+  delay_graph.set_xlabel('Baudrate[kbaud]')
   delay_graph.set_ylabel('2Delay[ms]')
 
   delay_min_array = []
@@ -83,13 +83,22 @@ if __name__ == '__main__':
     error_rate_array.append(float(elms[8]) * 100)
     rec_spdhz_array.append(speed_hz/1000)
 
+  if protocol in ['WiFi', 'Bluetooth']:
+    speed_hz_arr = list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))
+    delay_avr_array = delay_avr_array * len(speed_hz_arr)
+    delay_med_array = delay_med_array * len(speed_hz_arr)
+    delay_max_array = delay_max_array * len(speed_hz_arr)
+    delay_min_array = delay_min_array * len(speed_hz_arr)
+    error_rate_array = error_rate_array * len(speed_hz_arr)
+    rec_spdhz_array = [i/1000 for i in speed_hz_arr]
+
   # グラフを描画
 #         error_graph.plot(rec_spdhz_array, error_rate_array, '-D', markersize=4, linewidth = 2, label=protocol)
 #         delay_graph.plot(rec_spdhz_array, delay_med_array, '-D', markersize=4, linewidth = 2, label='Median value[ms]')
 #         delay_graph.plot(rec_spdhz_array, delay_max_array, '-D', markersize=4, linewidth = 2, label='Maximum value[ms]')
 #         delay_graph.plot(rec_spdhz_array, delay_min_array, '-D', markersize=4, linewidth = 2, label='Minimum value[ms]')
   error_graph.plot(rec_spdhz_array, error_rate_array, linewidth = 2, label=protocol)
-  delay_graph.plot(rec_spdhz_array, delay_avr_array, linewidth = 2, label='Avarage value[ms]')
+  # delay_graph.plot(rec_spdhz_array, delay_avr_array, linewidth = 2, label='Avarage value[ms]')
   delay_graph.plot(rec_spdhz_array, delay_med_array, linewidth = 2, label='Median value[ms]')
   delay_graph.plot(rec_spdhz_array, delay_max_array, linewidth = 2, label='Maximum value[ms]')
   delay_graph.plot(rec_spdhz_array, delay_min_array, linewidth = 2, label='Minimum value[ms]')

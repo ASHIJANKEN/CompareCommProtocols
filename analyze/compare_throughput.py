@@ -32,9 +32,9 @@ if __name__ == '__main__':
 #         throughput_graph.grid(which='minor',color='gray',linestyle='dotted')
 #   plt.yscale('log')
   width = 0.2
-  throughput_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+  throughput_graph.set_xlabel('Baudrate[kbaud]')
   throughput_graph.set_ylabel('throughput[kbps]')
-  error_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+  error_graph.set_xlabel('Baudrate[kbaud]')
   error_graph.set_ylabel('Error Rate[%]')
 
   send_bytes_array = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]

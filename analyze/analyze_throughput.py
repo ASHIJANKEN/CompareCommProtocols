@@ -43,9 +43,9 @@ if __name__ == '__main__':
 #       throughput_graph.grid(which='minor',color='gray',linestyle='dotted')
 #   plt.yscale('log')
   width = 0.2
-  throughput_graph.set_xlabel('Baudrate[baud(Hz)]')
+  throughput_graph.set_xlabel('Baudrate[baud]')
   throughput_graph.set_ylabel('throughput[kbps]')
-  error_graph.set_xlabel('Baudrate[baud(Hz)]')
+  error_graph.set_xlabel('Baudrate[baud]')
   error_graph.set_ylabel('Error Rate[%]')
 
   # speed_hzの情報を取り出す

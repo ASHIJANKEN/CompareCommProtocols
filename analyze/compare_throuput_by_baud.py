@@ -29,9 +29,9 @@ for ack_way in ['block_ack']:
 #         throuput_graph.grid(which='minor',color='gray',linestyle='dotted')
       #   plt.yscale('log')
         width = 0.2
-        throuput_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+        throuput_graph.set_xlabel('Baudrate[kbaud]')
         throuput_graph.set_ylabel('Throuput[kbps]')
-        error_graph.set_xlabel('Baudrate[kbaud(kHz)]')
+        error_graph.set_xlabel('Baudrate[kbaud]')
         error_graph.set_ylabel('Error Rate[%]')
 
         throuput_array = []

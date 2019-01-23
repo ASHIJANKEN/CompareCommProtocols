@@ -69,7 +69,6 @@ if __name__ == '__main__':
     protocols = ['SPI', 'I2C', 'UART']
   else:
     protocols = ['SPI', 'I2C', 'UART', 'Bluetooth', 'WiFi']
-    # protocols = ['UART']
 
   print('Are you sure to do start analyzing and generating graphs?')
   print('If it starts, old analyzed_data and graphs are immediately deleted and are overwritten by the program.')
@@ -117,27 +116,28 @@ if __name__ == '__main__':
   # for protocol in protocols:
   #   tuple_list.append((device, protocol, level_shift))
   # start_multithread(analyze_throughput, tuple_list)
+
   # clear_log()
 
-  # # delayの、ボーレートの変化による推移をグラフに出力
-  # # 平均値や中央値などを基準に折れ線グラフに出力
-  # # 誤り率を折れ線グラフで出力
-  # print('==================== [ Comparing delay ] ====================')
-  # tuple_list = []
-  # for protocol in protocols:
-  #   tuple_list.append((device, protocol, level_shift))
-  # start_multithread(compare_delay_fluctuation, tuple_list)
-  # clear_log()
-
-  # プロトコルごとのdelayを比較
-  # ゆらぎをヒストグラムに出力して比較
-  # 平均値や中央値などの変化を折れ線グラフに出力して比較
+  # delayの、ボーレートの変化による推移をグラフに出力
+  # 平均値や中央値などを基準に折れ線グラフに出力
   # 誤り率を折れ線グラフで出力
-  print('==================== [ Comparing delay by protocol ] ====================')
-  proc = subprocess.Popen(['python3', 'compare_delay_fluctuation_by_protocol.py', device, level_shift])
-  proc.wait()
-
+  print('==================== [ Comparing delay ] ====================')
+  tuple_list = []
+  for protocol in protocols:
+    tuple_list.append((device, protocol, level_shift))
+  start_multithread(compare_delay_fluctuation, tuple_list)
   clear_log()
+
+  # # プロトコルごとのdelayを比較
+  # # ゆらぎをヒストグラムに出力して比較
+  # # 平均値や中央値などの変化を折れ線グラフに出力して比較
+  # # 誤り率を折れ線グラフで出力
+  # print('==================== [ Comparing delay by protocol ] ====================')
+  # proc = subprocess.Popen(['python3', 'compare_delay_fluctuation_by_protocol.py', device, level_shift])
+  # proc.wait()
+
+  # clear_log()
 
   # # throughputの、ボーレートの変化による推移をグラフに出力
   # # send_bytesごとにthroughputを折れ線グラフで出力
@@ -149,21 +149,21 @@ if __name__ == '__main__':
   # start_multithread(compare_throughput, tuple_list)
   # clear_log()
 
-  # プロトコルごとのthroughputを比較
-  # send_bytesごとに、ボーレートの変化によるスループットの推移を棒グラフに出力して比較
-  # (ArduinoではI2CやUARTが断続的にしか通信できず、折れ線グラフが綺麗に出力できなかった。
-  # だからいくつかのボーレートをピックアップして、棒グラフで比較する形式をとった。ESPでは連続で取れているので、折れ線グラフ形式でいいと思う。)
-  # 誤り率も折れ線グラフで出力して比較
-  print('==================== [ Comparing throughput by protocol (bar graph) ] ====================')
-  proc = subprocess.Popen(['python3', 'compare_throughput_by_protocol_bar.py', device, level_shift])
-  proc.wait()
-
-  # プロトコルごとのthroughputを比較
-  # send_bytesごとに、ボーレートの変化によるスループットの推移を折れ線グラフに出力して比較
+  # # プロトコルごとのthroughputを比較
+  # # send_bytesごとに、ボーレートの変化によるスループットの推移を棒グラフに出力して比較
+  # # (ArduinoではI2CやUARTが断続的にしか通信できず、折れ線グラフが綺麗に出力できなかった。
+  # # だからいくつかのボーレートをピックアップして、棒グラフで比較する形式をとった。ESPでは連続で取れているので、折れ線グラフ形式でいいと思う。)
   # # 誤り率も折れ線グラフで出力して比較
-  print('==================== [ Comparing throughput by protocol (line graph) ] ====================')
-  proc = subprocess.Popen(['python3', 'compare_throughput_by_protocol_line.py', device, level_shift])
-  proc.wait()
+  # print('==================== [ Comparing throughput by protocol (bar graph) ] ====================')
+  # proc = subprocess.Popen(['python3', 'compare_throughput_by_protocol_bar.py', device, level_shift])
+  # proc.wait()
+
+  # # プロトコルごとのthroughputを比較
+  # # send_bytesごとに、ボーレートの変化によるスループットの推移を折れ線グラフに出力して比較
+  # # # 誤り率も折れ線グラフで出力して比較
+  # print('==================== [ Comparing throughput by protocol (line graph) ] ====================')
+  # proc = subprocess.Popen(['python3', 'compare_throughput_by_protocol_line.py', device, level_shift])
+  # proc.wait()
 
 
   print('Done!')
