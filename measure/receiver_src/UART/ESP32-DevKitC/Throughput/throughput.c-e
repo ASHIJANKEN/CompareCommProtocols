@@ -3,9 +3,9 @@
 #include "freertos/task.h"
 #include "driver/uart.h"
 
-#define EX_UART_NUM UART_NUM_0
-#define TXD_PIN  (UART_PIN_NO_CHANGE)
-#define RXD_PIN  (UART_PIN_NO_CHANGE)
+#define EX_UART_NUM UART_NUM_2
+#define TXD_PIN  17//(UART_PIN_NO_CHANGE)
+#define RXD_PIN  16//(UART_PIN_NO_CHANGE)
 #define RTS_PIN  (UART_PIN_NO_CHANGE)
 #define CTS_PIN  (UART_PIN_NO_CHANGE)
 

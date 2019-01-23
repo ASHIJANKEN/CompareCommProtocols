@@ -59,7 +59,7 @@ if __name__ == '__main__':
         records = {}
         for record in all_records:
           elms = re.split(':|\t', record)
-          if int(elms[1]) == 1000:
+          if send_bytes == int(elms[1]):
             records[int(elms[0])] = elms
     except IOError:
       print(throughput_file_path + ' cannot be opened.')
@@ -71,7 +71,7 @@ if __name__ == '__main__':
       if elms == None:
         throughput_array.append('#')
         error_rate_array.append('#')
-        spdhz_array_for_draw.append('#')
+        spdhz_array_for_draw.append(speed_hz)
         continue
 
       thput_bps = float(elms[2])
@@ -83,6 +83,7 @@ if __name__ == '__main__':
       spdhz_array_for_draw.append(speed_hz)
 
     # グラフを描画
+    print('length:{}'.format(len(throughput_array)))
     throughput_arr_draw = []
     error_rate_arr_draw = []
     spdhz_arr_draw = []
@@ -95,7 +96,6 @@ if __name__ == '__main__':
         error_rate_arr_draw.append(error_rate)
         spdhz_arr_draw.append(spdhz)
       else:
-        print('kugiri')
         if len(throughput_arr_draw) > 0:
           if is_labeled == False:
             error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)), label=str(send_bytes))
@@ -104,13 +104,7 @@ if __name__ == '__main__':
           else:
             error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)))
             throughput_graph.plot([i/1000 for i in spdhz_arr_draw], throughput_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)))
-#               if is_labeled == False:
-#                 error_graph.plot(spdhz_arr_draw, error_rate_arr_draw, linewidth = 2, color='blue', label='send_bytes=' + str(send_bytes) + '[byte]')
-#                 throughput_graph.plot(spdhz_arr_draw, throughput_arr_draw, linewidth = 2, color='blue', label='send_bytes=' + str(send_bytes) + '[byte]')
-#                 is_labeled = True
-#               else:
-#                 error_graph.plot(spdhz_arr_draw, error_rate_arr_draw, linewidth = 2, color='blue')
-#                 throughput_graph.plot(spdhz_arr_draw, throughput_arr_draw, linewidth = 2, color='blue')
+
         is_continuous = False
         throughput_arr_draw = []
         error_rate_arr_draw = []
@@ -118,8 +112,6 @@ if __name__ == '__main__':
     if is_continuous == True:
       error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)), label=str(send_bytes))
       throughput_graph.plot([i/1000 for i in spdhz_arr_draw], throughput_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)), label=str(send_bytes))
-#           error_graph.plot(spdhz_arr_draw, error_rate_arr_draw, linewidth = 2, color='blue', label='send_bytes=' + str(send_bytes) + '[byte]')
-#           throughput_graph.plot(spdhz_arr_draw, throughput_arr_draw, linewidth = 2, color='blue', label='send_bytes=' + str(send_bytes) + '[byte]')
     print('stop plot {} : {}'.format(protocol, send_bytes))
 
   # グラフ画像を保存

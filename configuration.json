@@ -1,7 +1,7 @@
 {
   "delay": {
     "SPI": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "delay.py",
       "receiver_src_name": {
         "Arduino_UNO": "Delay.ino",
@@ -9,7 +9,7 @@
       }
     },
     "I2C": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "delay.py",
       "receiver_src_name": {
         "Arduino_UNO": "Delay.ino",
@@ -17,7 +17,7 @@
       }
     },
     "UART": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "delay.py",
       "receiver_src_name": {
         "Arduino_UNO": "Delay.ino",
@@ -32,7 +32,7 @@
         "ESP32-DevKitC": "delay.c"
       }
     },
-    "TCP": {
+    "WiFi": {
       "": "Set 10000 for convenience",
       "speed_hz": "[10000]",
       "script_name": "delay.py",
@@ -44,7 +44,7 @@
 
   "throughput": {
     "SPI": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
@@ -52,7 +52,7 @@
       }
     },
     "I2C": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
@@ -60,7 +60,7 @@
       }
     },
     "UART": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "throughput.py",
       "receiver_src_name": {
         "Arduino_UNO": "Throughput.ino",
@@ -75,7 +75,7 @@
         "ESP32-DevKitC": "throughput.c"
       }
     },
-    "TCP": {
+    "WiFi": {
       "": "Set 10000 for convenience",
       "speed_hz": "[10000]",
       "script_name": "throughput.py",
@@ -87,21 +87,21 @@
 
   "proc_time": {
     "SPI": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "proc_time.py",
       "receiver_src_name": {
         "ESP32-DevKitC": "proctime.c"
       }
     },
     "I2C": {
-      "speed_hz": "list(set(list(range(10000, 116001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
+      "speed_hz": "list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))",
       "script_name": "proc_time.py",
       "receiver_src_name": {
         "Arduino_UNO": "ProcTime.ino",
         "ESP32-DevKitC": "proctime.c"
       }
     },
-    "TCP": {
+    "WiFi": {
       "": "Set 10000 for convenience",
       "speed_hz": "[10000]",
       "script_name": "proc_time.py",

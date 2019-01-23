@@ -20,7 +20,7 @@ level_shift = ''
 
 
 def create_receiver_src():
-  if protocol in ['SPI', 'Bluetooth', 'TCP']:
+  if protocol in ['SPI', 'Bluetooth', 'WiFi']:
     return
   elif device == 'ESP32-DevKitC' and protocol == 'I2C':
     return
@@ -136,7 +136,7 @@ def measure_proc_time():
     proc.terminate()
 
   elif device == 'ESP32-DevKitC':
-    if protocol == 'TCP':
+    if protocol == 'WiFi':
 
       # Makefileのあるところまで移動
       os.chdir(receiver_src_folder_path)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     # どのデバイスの実験を行うか決定
     while True:
       print('Select protocol to measure.')
-      print('1:SPI 2:I2C 3:UART 4:Bluetooth 5:TCP')
+      print('1:SPI 2:I2C 3:UART 4:Bluetooth 5:WiFi')
       cmd = input('> ')
       if cmd == 1:
         protocol = 'SPI'
@@ -219,14 +219,14 @@ if __name__ == '__main__':
         protocol = 'Bluetooth'
         break
       elif cmd == 5:
-        protocol = 'TCP'
+        protocol = 'WiFi'
         break
       else:
         print('Oops! Wrong command.')
         print('\n')
 
     # 何の実験を行うか決定
-    if protocol in ['SPI', 'I2C', 'TCP']:
+    if protocol in ['SPI', 'I2C', 'WiFi']:
       # I2Cの時はproc_timeを測れる
       while True:
         print('Select what you want to measure.')
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     # 何のレベルシフト方法を用いるか決定
     while True:
       # 無線通信では関係ないのでNone
-      if protocol in ['Bluetooth', 'TCP']:
+      if protocol in ['Bluetooth', 'WiFi']:
         level_shift = 'None'
         break
 

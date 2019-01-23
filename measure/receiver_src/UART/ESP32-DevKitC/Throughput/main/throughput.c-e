@@ -3,13 +3,13 @@
 #include "freertos/task.h"
 #include "driver/uart.h"
 
-#define EX_UART_NUM UART_NUM_0
-#define TXD_PIN  (UART_PIN_NO_CHANGE)
-#define RXD_PIN  (UART_PIN_NO_CHANGE)
+#define EX_UART_NUM UART_NUM_2
+#define TXD_PIN  17//(UART_PIN_NO_CHANGE)
+#define RXD_PIN  16//(UART_PIN_NO_CHANGE)
 #define RTS_PIN  (UART_PIN_NO_CHANGE)
 #define CTS_PIN  (UART_PIN_NO_CHANGE)
 
-#define BUF_SIZE 65
+#define BUF_SIZE (65)
 
 const int8_t rcv_vals[128] ={
     241, 187, 147, 213, 106, 157, 70, 187,
@@ -35,7 +35,7 @@ static void echo_task()
     /* Configure parameters of an UART driver,
      * communication pins and install the driver */
     uart_config_t uart_config = {
-        .baud_rate = 115200,
+        .baud_rate = 3000000,
         .data_bits = UART_DATA_8_BITS,
         .parity    = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
@@ -58,7 +58,6 @@ static void echo_task()
 
         // Read data from the UART
         uart_read_bytes(EX_UART_NUM, data, length, 1000 / portTICK_RATE_MS);
-//        uart_flush_input(EX_UART_NUM);
 
         // Check data
         uint8_t err = 0;

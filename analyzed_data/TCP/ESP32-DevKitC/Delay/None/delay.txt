@@ -1,2 +1,0 @@
-speed_hz[hz]	send_bytes[byte]	average_2Delay[ms]	median_2Delay[ms]	mode_2Delay[ms]	max_2Delay[ms]	min_2Delay[ms]	fluctuation[ms]	error_rate	variance[ms^2]	standard deviation[ms]
-10000	10000	28.383441945075983	 13.58562059020996	-1	647.4707657775879	4.127078720092774	619.0873238325119	0.0	3179.7672133180777	56.38942465851268

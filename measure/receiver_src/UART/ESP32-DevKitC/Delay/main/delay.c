@@ -4,9 +4,9 @@
 #include "driver/uart.h"
 
 
-#define EX_UART_NUM UART_NUM_0
-#define TXD_PIN  (UART_PIN_NO_CHANGE)
-#define RXD_PIN  (UART_PIN_NO_CHANGE)
+#define EX_UART_NUM UART_NUM_2
+#define TXD_PIN  17//(UART_PIN_NO_CHANGE)
+#define RXD_PIN  16//(UART_PIN_NO_CHANGE)
 #define RTS_PIN  (UART_PIN_NO_CHANGE)
 #define CTS_PIN  (UART_PIN_NO_CHANGE)
 
@@ -17,7 +17,7 @@ static void echo_task()
     /* Configure parameters of an UART driver,
      * communication pins and install the driver */
     uart_config_t uart_config = {
-        .baud_rate = 8000000,
+        .baud_rate = 3000000,
         .data_bits = UART_DATA_8_BITS,
         .parity    = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,

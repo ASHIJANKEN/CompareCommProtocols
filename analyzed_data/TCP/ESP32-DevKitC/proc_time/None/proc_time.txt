@@ -1,2 +1,0 @@
-speed_hz[hz]	send_bytes[byte]	average_proctime[us]	 median_proctime[us]	mode_proctime[us]	max_proctime[us]	min_proctime[us]
-10000	10000	21.3421	24.0	24.0	499.0	4.0

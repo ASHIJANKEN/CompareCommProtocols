@@ -17,7 +17,10 @@ if __name__ == '__main__':
   argvs = sys.argv
   device = argvs[1]
   level_shift = argvs[2]
-
+  if device == 'Arduino_UNO':
+    protocols = ['SPI', 'I2C', 'UART']
+  else:
+    protocols = ['SPI', 'I2C', 'UART', 'Bluetooth', 'WiFi']
 
   for send_bytes in [512, 1024]:
     # グラフ描画領域を作成
@@ -31,13 +34,13 @@ if __name__ == '__main__':
     throughput_graph.grid(which='major',color='gray',linestyle='--')
     throughput_graph.grid(which='minor',color='gray',linestyle='dotted')
   #   plt.yscale('log')
-    width = 0.2
+    width = 0.1
     throughput_graph.set_xlabel('Baudrate[kbaud(kHz)]')
     throughput_graph.set_ylabel('Throughput[kbps]')
     error_graph.set_xlabel('Baudrate[kbaud(kHz)]')
     error_graph.set_ylabel('Error Rate[%]')
 
-    for num, protocol in enumerate(['SPI', 'I2C', 'UART', 'Bluetooth', 'TCP']):
+    for num, protocol in enumerate(protocols):
       throughput_array = []
       error_rate_array = []
       spdhz_array_for_error_rate = []
@@ -73,7 +76,7 @@ if __name__ == '__main__':
         error_rate_array.append(error_rate*100)
         spdhz_array_for_error_rate.append(speed_hz)
 
-      if protocol in ['Bluetooth', 'TCP']:
+      if protocol in ['Bluetooth', 'WiFi']:
         throughput_array = throughput_array * len(speed_hz_arr)
         error_rate_array = error_rate_array * len(speed_hz_arr)
         spdhz_array_for_error_rate = speed_hz_arr
@@ -92,7 +95,7 @@ if __name__ == '__main__':
     throughput_graph.set_title('When RPi sends ' + str(send_bytes) + ' bytes to ' + device)
     error_graph.set_title('When RPi sends ' + str(send_bytes) + ' bytes to ' + device)
 
-    compare_throughput_dir = '../analyzed_data/compare_throughput/' + level_shift + '/'
+    compare_throughput_dir = '../analyzed_data/compare_throughput/' + device + '/' + level_shift + '/'
     pdf_folder_path = compare_throughput_dir + 'pdf'
     png_folder_path = compare_throughput_dir + 'png'
     os.makedirs(pdf_folder_path, exist_ok = True)

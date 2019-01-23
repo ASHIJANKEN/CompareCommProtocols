@@ -19,5 +19,6 @@
 
 # Large data folder
 measured_data/
-
+analyzed_data/**/*.png
+analyzed_data/**/*.pdf
 

@@ -18,13 +18,22 @@ if __name__ == '__main__':
   argvs = sys.argv
   device = argvs[1]
   level_shift = argvs[2]
+  if device == 'Arduino_UNO':
+    protocols = ['SPI', 'I2C', 'UART']
+  else:
+    protocols = ['SPI', 'I2C', 'UART', 'Bluetooth', 'WiFi']
 
   all_delay_array = {'max':[], 'min':[], 'med':[], 'avr':[]}
   all_error_rate_array = []
   all_rec_spdhz_array = []
 
-  protocol_arr = ['SPI', 'I2C', 'UART', 'Bluetooth', 'TCP']
-  for protocol in protocol_arr:
+  # speed_hzの情報を取り出す
+  with open(os.path.abspath('../configuration.json'), mode='r') as f:
+    config = json.load(f)
+  speed_hz_arr = eval(config['delay']['SPI']['speed_hz'])
+  speed_hz_arr.sort()
+
+  for protocol in protocols:
 
     delay_min_array  = []
     delay_max_array  = []
@@ -33,11 +42,6 @@ if __name__ == '__main__':
     error_rate_array = []
     rec_spdhz_array  = []
 
-    # speed_hzの情報を取り出す
-    with open(os.path.abspath('../configuration.json'), mode='r') as f:
-      config = json.load(f)
-    speed_hz_arr = eval(config['delay'][protocol]['speed_hz'])
-    speed_hz_arr.sort()
 
     # 2delayのデータを取得
     try:
@@ -69,6 +73,14 @@ if __name__ == '__main__':
       error_rate_array.append(float(elms[8]) * 100)
       rec_spdhz_array.append(speed_hz/1000)
 
+    if protocol in ['TCP', 'Bluetooth']:
+      delay_avr_array = delay_avr_array * len(speed_hz_arr)
+      delay_med_array = delay_med_array * len(speed_hz_arr)
+      delay_max_array = delay_max_array * len(speed_hz_arr)
+      delay_min_array = delay_min_array * len(speed_hz_arr)
+      error_rate_array = error_rate_array * len(speed_hz_arr)
+      rec_spdhz_array = [i/1000 for i in speed_hz_arr]
+
     # protocolごとにデータを配列に格納
     all_delay_array['max'].append(delay_max_array)
     all_delay_array['med'].append(delay_med_array)
@@ -76,6 +88,7 @@ if __name__ == '__main__':
     all_delay_array['min'].append(delay_min_array)
     all_error_rate_array.append(error_rate_array)
     all_rec_spdhz_array.append(rec_spdhz_array)
+
 
   # 通信方法ごとに比較するためのグラフを出力
   error_fig = plt.figure(figsize=(10, 5))
@@ -96,11 +109,9 @@ if __name__ == '__main__':
     delay_graph[i].set_ylabel('2Delay[ms]')
 
   # グラフを描画
-  for i,protocol in enumerate(protocol_arr):
-#         error_graph.plot(all_rec_spdhz_array[i], all_error_rate_array[i], '-D', markersize=4, linewidth = 2, label=protocol)
+  for i,protocol in enumerate(protocols):
     error_graph.plot(all_rec_spdhz_array[i], all_error_rate_array[i], linewidth = 2, label=protocol)
     for j, val in enumerate(['max', 'min', 'med', 'avr']):
-#           delay_graph[j].plot(all_rec_spdhz_array[i], all_delay_array[val][i], '-D', markersize=4, linewidth = 2, label=protocol)
       delay_graph[j].plot(all_rec_spdhz_array[i], all_delay_array[val][i], linewidth = 2, label=protocol)
 
   # グラフ画像を保存
@@ -109,7 +120,7 @@ if __name__ == '__main__':
   error_graph.set_xlim(xmin=0)
   error_graph.set_title('Compare Error Rate')
 
-  compare_delay_dir = '../analyzed_data/compare_2delay/' + level_shift + '/'
+  compare_delay_dir = '../analyzed_data/compare_2delay/' + device + '/' + level_shift + '/'
 
   pdf_folder_path = compare_delay_dir + 'pdf'
   png_folder_path = compare_delay_dir + 'png'

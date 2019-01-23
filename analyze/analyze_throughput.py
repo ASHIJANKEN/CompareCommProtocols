@@ -140,10 +140,10 @@ if __name__ == '__main__':
       print('{0} : Recorded {1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}'.format(record_file_path, speed_hz, send_bytes, avr_thput, median_thput, mode_thput, max_thput, min_thput, fluctuation, error_rate, variance, std))
 
 
-    print("spdhz_array_for_error_rate; {}".format(len(spdhz_array_for_error_rate)))
-    print("error_rate_array; {}".format(len(error_rate_array)))
-    print("throughput_array; {}".format(len(throughput_array)))
-    print("speed_hz_arr; {}".format(len(speed_hz_arr)))
+    print("spdhz_array_for_error_rate: {}".format(len(spdhz_array_for_error_rate)))
+    print("error_rate_array: {}".format(len(error_rate_array)))
+    print("throughput_array: {}".format(len(throughput_array)))
+    print("speed_hz_arr: {}".format(len(speed_hz_arr)))
 
 
     # グラフを描画

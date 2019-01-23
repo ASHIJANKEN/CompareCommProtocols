@@ -102,6 +102,7 @@ if __name__ == '__main__':
 
     # ヒストグラムを作成、pngで保存
     fig2 = plt.figure()
+    # fig2 = plt.figure(figsize=(200,5),dpi=100)
     plt.rcParams["font.size"] = 14
     ax = fig2.add_subplot(1,1,1)
     ax.grid(which='major',color='gray',linestyle='--')
