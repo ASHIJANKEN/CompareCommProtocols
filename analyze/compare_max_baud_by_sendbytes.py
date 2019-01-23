@@ -88,8 +88,8 @@ for ack_way in ['block_ack']:
       pdf_path = base_dir + analyzed_data_dir + folder_dir + 'pdf'
       png_path = base_dir + analyzed_data_dir + folder_dir + 'png'
       try:
-        os.mkdir(pdf_path)
-        os.mkdir(png_path)
+        os.makedirs(pdf_path)
+        os.makedirs(png_path)
       except FileExistsError:
         pass
       plt.savefig(pdf_path + '/' + 'compare_maxbaudrate(' + shift_way + ').pdf')

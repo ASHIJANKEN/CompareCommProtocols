@@ -84,8 +84,8 @@ for ack_way in ['block_ack']:
       pdf_folder_path = base_dir + analyzed_data_dir + folder_dir + 'pdf'
       png_folder_path = base_dir + analyzed_data_dir + folder_dir + 'png'
       try:
-        os.mkdir(png_folder_path)
-        os.mkdir(pdf_folder_path)
+        os.makedirs(png_folder_path)
+        os.makedirs(pdf_folder_path)
       except FileExistsError:
         pass
 
