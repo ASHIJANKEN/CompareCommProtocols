@@ -27,7 +27,7 @@ if __name__ == '__main__':
   # speed_hzの情報を取り出す
   with open(os.path.abspath('../configuration.json'), mode='r') as f:
     config = json.load(f)
-  speed_hz_arr = eval(config['proc_time']['SPI']['speed_hz'])
+  speed_hz_arr = eval(config['throughput']['SPI']['speed_hz'])
   speed_hz_arr.sort()
 
   for send_bytes in [512, 1024]:
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         continue
 
       for speed_hz in speed_hz_arr:
-        # スループット平均値と誤り率を得る
+        # スループット中央値と誤り率を得る
         elms = records.get(speed_hz)
         if elms == None:
           throughput_array.append('#')
@@ -80,7 +80,7 @@ if __name__ == '__main__':
           continue
 
         # グラフ描画用に値を保存
-        thput_bps = float(elms[2])
+        thput_bps = float(elms[3])
         error_rate = float(elms[8])
         throughput_array.append((thput_bps * (1-error_rate)) / 1000)
         error_rate_array.append(error_rate*100)
@@ -104,8 +104,6 @@ if __name__ == '__main__':
           error_rate_arr_draw.append(error_rate)
           spdhz_arr_draw.append(spdhz)
         else:
-          if protocol == 'SPI':
-            print('aaaa')
           if len(throughput_arr_draw) > 0:
             if is_labeled == False:
               error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(num)/len(protocols)), label=protocol)

@@ -64,11 +64,15 @@ def start_multithread(target_func, arg_tuple):
 if __name__ == '__main__':
   device = 'ESP32-DevKitC'
   level_shift = 'None'
+  # device = 'Arduino_UNO'
+  # level_shift = '2N7000'
 
   if device == 'Arduino_UNO':
-    protocols = ['SPI', 'I2C', 'UART']
+    # protocols = ['SPI', 'I2C', 'UART']
+    protocols = ['SPI']
   else:
-    protocols = ['SPI', 'I2C', 'UART', 'Bluetooth', 'WiFi']
+    # protocols = ['SPI', 'I2C', 'UART', 'Bluetooth', 'WiFi']
+    protocols = ['Bluetooth', 'WiFi']
 
   print('Are you sure to do start analyzing and generating graphs?')
   print('If it starts, old analyzed_data and graphs are immediately deleted and are overwritten by the program.')
@@ -93,7 +97,11 @@ if __name__ == '__main__':
   # # # どのくらいゆらぐかをヒストグラムに出力
   # print('==================== [ Analyzing proc_time ] ====================')
   # tuple_list = []
-  # for protocol in list(set(protocols) - set(['UART', 'Bluetooth'])):
+  # if device == 'Arduino_UNO':
+  #   protocols_for_proc_time = list(set(protocols) - set(['UART', 'SPI']))
+  # if device == 'ESP32-DevKitC':
+  #   protocols_for_proc_time = list(set(protocols) - set(['UART', 'Bluetooth']))
+  # for protocol in protocols_for_proc_time:
   #   tuple_list.append((device, protocol, level_shift))
   # start_multithread(analyze_proc_time, tuple_list)
   # clear_log()
@@ -119,15 +127,15 @@ if __name__ == '__main__':
 
   # clear_log()
 
-  # delayの、ボーレートの変化による推移をグラフに出力
-  # 平均値や中央値などを基準に折れ線グラフに出力
-  # 誤り率を折れ線グラフで出力
-  print('==================== [ Comparing delay ] ====================')
-  tuple_list = []
-  for protocol in protocols:
-    tuple_list.append((device, protocol, level_shift))
-  start_multithread(compare_delay_fluctuation, tuple_list)
-  clear_log()
+  # # delayの、ボーレートの変化による推移をグラフに出力
+  # # 平均値や中央値などを基準に折れ線グラフに出力
+  # # 誤り率を折れ線グラフで出力
+  # print('==================== [ Comparing delay ] ====================')
+  # tuple_list = []
+  # for protocol in protocols:
+  #   tuple_list.append((device, protocol, level_shift))
+  # start_multithread(compare_delay_fluctuation, tuple_list)
+  # clear_log()
 
   # # プロトコルごとのdelayを比較
   # # ゆらぎをヒストグラムに出力して比較
@@ -139,15 +147,15 @@ if __name__ == '__main__':
 
   # clear_log()
 
-  # # throughputの、ボーレートの変化による推移をグラフに出力
-  # # send_bytesごとにthroughputを折れ線グラフで出力
-  # # send_bytsごとの誤り率を折れ線グラフで出力
-  # print('==================== [ Comparing throughput ] ====================')
-  # tuple_list = []
-  # for protocol in protocols:
-  #   tuple_list.append((device, protocol, level_shift))
-  # start_multithread(compare_throughput, tuple_list)
-  # clear_log()
+  # throughputの、ボーレートの変化による推移をグラフに出力
+  # send_bytesごとにthroughputを折れ線グラフで出力
+  # send_bytsごとの誤り率を折れ線グラフで出力
+  print('==================== [ Comparing throughput ] ====================')
+  tuple_list = []
+  for protocol in protocols:
+    tuple_list.append((device, protocol, level_shift))
+  start_multithread(compare_throughput, tuple_list)
+  clear_log()
 
   # # プロトコルごとのthroughputを比較
   # # send_bytesごとに、ボーレートの変化によるスループットの推移を棒グラフに出力して比較

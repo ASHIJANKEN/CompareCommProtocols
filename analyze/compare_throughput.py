@@ -66,7 +66,7 @@ if __name__ == '__main__':
       continue
 
     for speed_hz in speed_hz_arr:
-      # スループット平均値と誤り率を得る
+      # スループット中央値と誤り率を得る
       elms = records.get(speed_hz)
       if elms == None:
         throughput_array.append('#')
@@ -74,13 +74,19 @@ if __name__ == '__main__':
         spdhz_array_for_draw.append(speed_hz)
         continue
 
-      thput_bps = float(elms[2])
+      thput_bps = float(elms[3])
       error_rate = float(elms[8])
 
       # グラフ描画用に値を保存
       throughput_array.append((thput_bps * (1-error_rate)) / 1000)
       error_rate_array.append(error_rate*100)
       spdhz_array_for_draw.append(speed_hz)
+
+    if protocol in ['WiFi', 'Bluetooth']:
+      speed_hz_arr = list(set(list(range(10000, 3000001, 1000)) + [10000, 14400, 19200, 28800, 38400, 57600, 115200]))
+      spdhz_array_for_draw = speed_hz_arr
+      throughput_array = throughput_array * len(speed_hz_arr)
+      error_rate_array = error_rate_array * len(speed_hz_arr)
 
     # グラフを描画
     print('length:{}'.format(len(throughput_array)))
@@ -109,14 +115,19 @@ if __name__ == '__main__':
         throughput_arr_draw = []
         error_rate_arr_draw = []
         spdhz_arr_draw = []
-    if is_continuous == True:
+
+    if is_labeled == False:
       error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)), label=str(send_bytes))
       throughput_graph.plot([i/1000 for i in spdhz_arr_draw], throughput_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)), label=str(send_bytes))
+      is_labeled = True
+    else:
+      error_graph.plot([i/1000 for i in spdhz_arr_draw], error_rate_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)))
+      throughput_graph.plot([i/1000 for i in spdhz_arr_draw], throughput_arr_draw, linewidth = 2, color=cm.tab10(float(graph_num)/len(send_bytes_array)))
     print('stop plot {} : {}'.format(protocol, send_bytes))
 
   # グラフ画像を保存
-  error_graph.legend(title='Send Data[byte]')
-  throughput_graph.legend(title='Send Data[byte]')
+  error_graph.legend(title='N[byte]')
+  throughput_graph.legend(title='N[byte]')
   throughput_graph.set_xlim(xmin=0)
   error_graph.set_ylim(ymin = 0, ymax = 100)
   error_graph.set_xlim(xmin=0)
