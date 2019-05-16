@@ -83,7 +83,7 @@ void app_main()
         // sendbuf[0] = rcv;
         // sprintf(sendbuf, "This is the receiver, sending data for transmission number %04d.", n);
 
-        //Set up a transaction of 128 bytes to send/receive
+        //Set up a transaction of 4080 bytes to send/receive
         t.length = 4080*8;
         t.tx_buffer = sendbuf;
         t.rx_buffer = recvbuf;
